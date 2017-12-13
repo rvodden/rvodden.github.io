@@ -1,1 +1,35 @@
-theme: jekyll-theme-minima
+title: Garbage Collection
+description: This is a collection of all the garbage which comes out of my mind.
+author: Richard Vodden
+author_email: richard@vodden.com
+twitter_username: rvodden
+github_username: rvodden
+linkedin_username: rvodden
+url: http://www.vodden.com/
+defaults:
+    -
+        scope:
+            path: ""
+            type: "posts"
+        values:
+            layout: "default"
+
+## Build Stuff
+
+theme: minima
+markdown: kramdown
+highlight: rouge
+kramdown:
+    input: GFM
+    syntax_highligher: rouge
+    syntax_highlighter_opts:
+        css_class: 'highlight'
+        span: 
+            line_numbers: false
+        block:
+            line_numbers: true
+            start_line: 1
+exclude:
+    - Gemfile
+    - CNAME
+    - Gemfile.lock
