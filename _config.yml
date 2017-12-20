@@ -16,7 +16,7 @@ defaults:
 
 ## Build Stuff
 
-theme: minima
+remote_theme: rvodden/minima
 markdown: kramdown
 highlight: rouge
 kramdown:
@@ -33,3 +33,7 @@ exclude:
     - Gemfile
     - CNAME
     - Gemfile.lock
+
+plugins:
+    - jekyll-assets
+    - jekyll-remote-theme
