@@ -22,6 +22,8 @@ rm -R _site/
 git config user.name "$USER_NAME"
 git config user.email "$USER_EMAIL"
 
+echo "vodden.com" > CNAME
+
 git add -fA
 git commit --allow-empty -m "$(git log -1 --pretty=%B) [ci skip]"
 git push -f $ORIGIN_URL master
