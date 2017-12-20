@@ -2,10 +2,10 @@ version: 2
 defaults: &defaults
     working_directory: ~/build
     environment:
-        - USER_NAME: Richard Vodden
-        - USER_EMAIL: richard@vodden.com
+        - USER_NAME: "Richard Vodden"
+        - USER_EMAIL: "richard@vodden.com"
     docker:
-        image: circleci/ruby:2.4.3
+        - image: circleci/ruby:2.4.3
 
 jobs:
     build:
