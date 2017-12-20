@@ -1,0 +1,42 @@
+version: 2
+defaults: &defaults
+    working_directory: /tmp
+    environment:
+        USER_NAME: Richard Vodden
+        USER_EMAIL: richard@vodden.com
+    docker:
+        image: circleci/ruby:2.4.3
+
+jobs:
+    build:
+        <<: *defaults
+        steps:
+            - checkout
+            - run:
+                name: Install Dependencies
+                command: bundle check || bundle install
+            - save_cache:
+                key: bundle_{{ checksum "Gemfile.lock" }}
+                paths:
+                    - vendor/bundle
+            - run:
+                name: Build Website:
+                command: bundle exec jekyll build
+    
+    test:
+        <<: *defaults
+        requires:
+            - build
+        steps:
+            - run:
+                name: Validate HTML
+                command: bundle exec htmlproofer ./_site --check-html --disable-external
+    
+    deploy:
+        <<: *defaults
+        requires:
+            - test
+        docker:
+            image: circleci/ruby:2.4.3
+
+
