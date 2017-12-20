@@ -30,6 +30,7 @@ kramdown:
             line_numbers: true
             start_line: 1
 exclude:
+    - vendor
     - Gemfile
     - CNAME
     - Gemfile.lock

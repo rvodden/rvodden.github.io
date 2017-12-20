@@ -55,6 +55,8 @@ GEM
       jekyll (~> 3.1)
     jekyll-sass-converter (1.5.1)
       sass (~> 3.4)
+    jekyll-seo-tag (2.4.0)
+      jekyll (~> 3.3)
     jekyll-watch (1.5.1)
       listen (~> 3.0)
     kramdown (1.16.2)
@@ -102,6 +104,7 @@ PLATFORMS
 DEPENDENCIES
   jekyll-assets!
   jekyll-remote-theme (~> 0.2.3)
+  jekyll-seo-tag (~> 2.4.0)
   sprockets (~> 4.0.beta)
 
 BUNDLED WITH

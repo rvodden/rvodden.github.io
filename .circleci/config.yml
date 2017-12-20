@@ -11,7 +11,7 @@ jobs:
             - checkout
             - run:
                 name: Install Dependencies
-                command: bundle check || bundle install
+                command: bundle install --path vendor/bundle
             - run:
                 name: Build Website
                 command: bundle exec jekyll build
@@ -22,9 +22,3 @@ workflows:
     build-and-deploy:
         jobs:
             - build
-            - test
-            - deploy:
-                filters:
-                    branches:
-                        only: draft
-
