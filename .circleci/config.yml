@@ -6,9 +6,6 @@ defaults: &defaults
         USER_EMAIL: richard@vodden.com
     docker:
         image: circleci/ruby:2.4.3
-    branches:
-      only:
-        - draft
 
 jobs:
     build:
@@ -58,4 +55,8 @@ workflows:
         jobs:
             - build
             - test
-            - deploy
+            - deploy:
+                filters:
+                    braches:
+                        only: draft
+
