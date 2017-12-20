@@ -25,7 +25,7 @@ jobs:
                 paths:
                     - vendor/bundle
             - run:
-                name: Build Website:
+                name: Build Website
                 command: bundle exec jekyll build
     
     test:
