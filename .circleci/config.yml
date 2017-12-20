@@ -1,15 +1,12 @@
 version: 2
-defaults: &defaults
-    working_directory: ~/build
-    environment:
-        - USER_NAME: "Richard Vodden"
-        - USER_EMAIL: "richard@vodden.com"
-    docker:
-        - image: circleci/ruby:2.4.3
-
 jobs:
     build:
-        <<: *defaults
+        working_directory: ~/build
+        environment:
+            - USER_NAME: "Richard Vodden"
+            - USER_EMAIL: "richard@vodden.com"
+        docker:
+            - image: circleci/ruby:2.4.3
         steps:
             - checkout
             - attach_workspace:
@@ -26,7 +23,12 @@ jobs:
                 command: bundle exec jekyll build
     
     test:
-        <<: *defaults
+        working_directory: ~/build
+        environment:
+            - USER_NAME: "Richard Vodden"
+            - USER_EMAIL: "richard@vodden.com"
+        docker:
+            - image: circleci/ruby:2.4.3
         requires:
             - build
         steps:
@@ -37,7 +39,12 @@ jobs:
                 command: bundle exec htmlproofer ./_site --check-html --disable-external
     
     deploy:
-        <<: *defaults
+        working_directory: ~/build
+        environment:
+            - USER_NAME: "Richard Vodden"
+            - USER_EMAIL: "richard@vodden.com"
+        docker:
+            - image: circleci/ruby:2.4.3
         requires:
             - test
         docker:
