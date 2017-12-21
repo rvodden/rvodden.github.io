@@ -56,10 +56,6 @@ jobs:
             - USER_EMAIL: "richard@vodden.com"
         docker:
             - image: circleci/ruby:2.4.3
-        requires:
-            - test
-        docker:
-            image: circleci/ruby:2.4.3
         steps:
             - attach_workspace:
                 at: ~/build
