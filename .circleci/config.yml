@@ -22,7 +22,9 @@ jobs:
                 name: Build Website
                 command: bundle exec jekyll build
             - persist_to_workspace:
-                - ~/build
+                root: ~/build
+                paths:
+                    - .
     test:
         working_directory: ~/build
         environment:
