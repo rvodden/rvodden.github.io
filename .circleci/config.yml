@@ -22,9 +22,9 @@ jobs:
                 name: Build Website
                 command: bundle exec jekyll build
             - persist_to_workspace:
-                root: ~
+                root: ~/build
                 paths:
-                    - build
+                    - _site
     test:
         working_directory: ~/build
         environment:
@@ -36,14 +36,14 @@ jobs:
             - build
         steps:
             - attach_workspace:
-                at: build
+                at: ~/build
             - run:
                 name: Validate HTML
                 command: bundle exec htmlproofer ./_site --assume-extension --disable-external
             - persist_to_workspace:
                 root: ~
                 paths:
-                    - build
+                    - _site
 
 workflows:
     version: 2
