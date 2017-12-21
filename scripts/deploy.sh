@@ -38,7 +38,7 @@ echo "vodden.com" > CNAME
 
 git add -fA
 git commit --allow-empty -m "$(git log -1 --pretty=%B) [ci skip]"
-git push -f $ORIGIN_URL master
+yes | git push -f $ORIGIN_URL master
 
 # Move back to previous branch.
 git checkout -
