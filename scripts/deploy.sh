@@ -10,7 +10,8 @@ if [ 0 -ne ${?}  ]; then
     exit -1
 fi
 
-export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
+mkdir -p ~/.ssh
+ssh-keyscan github.com >> ~/.ssh/known_hosts
 
 echo "Started deploying"
 
