@@ -13,7 +13,7 @@ jobs:
                 at: ~/build
             - run:
                 name: Install Dependencies
-                command: bundle check || bundle install
+                command: bundle install --path vendor/bundle
             - save_cache:
                 key: bundle_{{ checksum "Gemfile.lock" }}
                 paths:
