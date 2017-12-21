@@ -1,12 +1,18 @@
 #!/bin/sh
-set -eu pipefail
+set -eux pipefail
 
 # Variables
-ORIGIN_URL=`git config --get remote.origin.url`
+ORIGIN_URL=$(git config --get remote.origin.url 2>&1)
+
+if [[ ${?} -ne 0  ]]; then
+    echo "Failed to get origin URL"
+    echo $ORIGIN_URL
+    exit -1
+fi
 
 echo "Started deploying"
 
-# Checkout gh-pages branch.
+# Checkout new master branch.
 if [ `git branch | grep master` ]
 then
   git branch -D master
