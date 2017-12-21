@@ -78,3 +78,10 @@ workflows:
                             - draft
                 requires:
                     - build
+            - deploy:
+                filters:
+                    branches:
+                        only:
+                            - draft
+                requires:
+                    - test
