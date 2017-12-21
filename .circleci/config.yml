@@ -35,6 +35,7 @@ jobs:
         requires:
             - build
         steps:
+            - checkout
             - attach_workspace:
                 at: ~/build
             - restore_cache:
