@@ -38,6 +38,9 @@ jobs:
             - attach_workspace:
                 at: ~/build
             - run:
+                name: Install Dependencies
+                command: bundle install --path vendor/bundle
+            - run:
                 name: Validate HTML
                 command: bundle exec htmlproofer ./_site --assume-extension --disable-external
             - persist_to_workspace:
