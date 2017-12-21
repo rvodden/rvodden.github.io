@@ -9,8 +9,6 @@ jobs:
             - image: circleci/ruby:2.4.3
         steps:
             - checkout
-            - attach_workspace:
-                at: ~/build
             - restore_cache:
                 key: bundle_{{ checksum "Gemfile.lock" }}
             - run:
@@ -23,6 +21,8 @@ jobs:
             - run:
                 name: Build Website
                 command: bundle exec jekyll build
+            - persist_to_workspace:
+                - ~/build
     test:
         working_directory: ~/build
         environment:
@@ -35,6 +35,8 @@ jobs:
         steps:
             - attach_workspace:
                 at: ~/build
+            - restore_cache:
+                key: bundle_{{ checksum "Gemfile.lock" }}
             - run:
                 name: Validate HTML
                 command: bundle exec htmlproofer ./_site --check-html --disable-external
