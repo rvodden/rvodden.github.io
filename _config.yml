@@ -37,3 +37,4 @@ exclude:
 
 plugins:
     - jekyll-assets
+    - jekyll-feed
