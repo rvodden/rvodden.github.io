@@ -21,7 +21,21 @@ jobs:
             - run:
                 name: Build Website
                 command: bundle exec jekyll build
-    
+    test:
+        working_directory: ~/build
+        environment:
+            - USER_NAME: "Richard Vodden"
+            - USER_EMAIL: "richard@vodden.com"
+        docker:
+            - image: circleci/ruby:2.4.3
+        requires:
+            - build
+        steps:
+            - attach_workspace:
+                at: ~/build
+            - run:
+                name: Validate HTML
+                command: bundle exec htmlproofer ./_site --check-html --disable-external
 
 workflows:
     version: 2
