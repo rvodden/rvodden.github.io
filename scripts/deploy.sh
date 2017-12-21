@@ -10,7 +10,7 @@ if [ 0 -ne ${?}  ]; then
     exit -1
 fi
 
-GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
+export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
 
 echo "Started deploying"
 
