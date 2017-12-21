@@ -4,13 +4,11 @@ set -eux pipefail
 # Variables
 ORIGIN_URL=$(git config --get remote.origin.url 2>&1)
 
-if [[ ${?} -ne 0  ]]; then
+if [ -n ${?}  ]; then
     echo "Failed to get origin URL"
     echo $ORIGIN_URL
     exit -1
 fi
-
-
 
 # Trust github
 mkdir -p ~/.ssh
