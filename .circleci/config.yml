@@ -24,6 +24,7 @@ jobs:
             - persist_to_workspace:
                 root: ~/build
                 paths:
+                    - vendor/bundle
                     - _site
     test:
         working_directory: ~/build
@@ -35,14 +36,13 @@ jobs:
         steps:
             - attach_workspace:
                 at: ~/build
-            - restore_cache:
-                key: bundle_{{ checksum "Gemfile.lock" }}
             - run:
                 name: Validate HTML
                 command: bundle exec htmlproofer ./_site --assume-extension --disable-external
             - persist_to_workspace:
                 root: ~/build
                 paths:
+                    - vendor/bundle
                     - _site
 
 workflows:
