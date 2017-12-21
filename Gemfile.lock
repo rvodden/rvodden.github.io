@@ -1,18 +1,10 @@
 GIT
-  remote: https://github.com/envygeeks/jekyll-assets
-  revision: 575b2cd33abc7084c7190c0237dcfb7104696869
+  remote: git://github.com/rvodden/minima.git
+  revision: 8d0f49d140d4980b8c891916f4b2277b2d96ba37
   specs:
-    jekyll-assets (3.0.5)
-      activesupport (~> 5.0)
-      execjs (~> 2.7)
-      extras (~> 0.2)
-      fastimage (~> 2.0, >= 1.8)
-      jekyll (>= 3.5, < 4.0)
-      jekyll-sanity (~> 1.2)
-      liquid-tag-parser (~> 1.0)
-      nokogiri (~> 1.8)
-      pathutil (~> 0.16)
-      sprockets (>= 3.3, < 4.1.beta)
+    minima (2.1.1)
+      jekyll (~> 3.5)
+      jekyll-seo-tag (~> 2.1)
 
 GEM
   remote: https://rubygems.org/
@@ -26,8 +18,6 @@ GEM
       public_suffix (>= 2.0.2, < 4.0)
     colorator (1.1.0)
     concurrent-ruby (1.0.5)
-    ethon (0.11.0)
-      ffi (>= 1.3.0)
     execjs (2.7.0)
     extras (0.3.0)
       forwardable-extended (~> 2.5)
@@ -47,10 +37,17 @@ GEM
       pathutil (~> 0.9)
       rouge (>= 1.7, < 3)
       safe_yaml (~> 1.0)
-    jekyll-remote-theme (0.2.3)
-      jekyll (~> 3.5)
-      rubyzip (>= 1.2.1, < 3.0)
-      typhoeus (>= 0.7, < 2.0)
+    jekyll-assets (3.0.5)
+      activesupport (~> 5.0)
+      execjs (~> 2.7)
+      extras (~> 0.2)
+      fastimage (~> 2.0, >= 1.8)
+      jekyll (>= 3.5, < 4.0)
+      jekyll-sanity (~> 1.2)
+      liquid-tag-parser (~> 1.0)
+      nokogiri (~> 1.8)
+      pathutil (~> 0.16)
+      sprockets (>= 3.3, < 4.1.beta)
     jekyll-sanity (1.2.0)
       jekyll (~> 3.1)
     jekyll-sass-converter (1.5.1)
@@ -82,19 +79,16 @@ GEM
       ffi (>= 0.5.0, < 2)
     rouge (2.2.1)
     ruby_dep (1.5.0)
-    rubyzip (1.2.1)
     safe_yaml (1.0.4)
     sass (3.5.4)
       sass-listen (~> 4.0.0)
     sass-listen (4.0.0)
       rb-fsevent (~> 0.9, >= 0.9.4)
       rb-inotify (~> 0.9, >= 0.9.7)
-    sprockets (4.0.0.beta6)
+    sprockets (3.7.1)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
     thread_safe (0.3.6)
-    typhoeus (1.3.0)
-      ethon (>= 0.9.0)
     tzinfo (1.2.4)
       thread_safe (~> 0.1)
 
@@ -102,10 +96,11 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  jekyll-assets!
-  jekyll-remote-theme (~> 0.2.3)
-  jekyll-seo-tag (~> 2.4.0)
-  sprockets (~> 4.0.beta)
+  jekyll
+  jekyll-assets
+  jekyll-seo-tag
+  minima!
+  sprockets
 
 BUNDLED WITH
    1.16.0

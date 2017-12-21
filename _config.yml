@@ -16,7 +16,7 @@ defaults:
 
 ## Build Stuff
 
-remote_theme: rvodden/minima
+theme: minima
 markdown: kramdown
 highlight: rouge
 kramdown:
@@ -37,4 +37,3 @@ exclude:
 
 plugins:
     - jekyll-assets
-    - jekyll-remote-theme
