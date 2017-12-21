@@ -67,6 +67,14 @@ workflows:
     build-and-deploy:
         jobs:
             - build
+                filters:
+                    branches:
+                        only:
+                            - draft
             - test:
+                filters:
+                    branches:
+                        only:
+                            - draft
                 requires:
                     - build
