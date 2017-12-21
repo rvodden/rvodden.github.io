@@ -49,7 +49,23 @@ jobs:
                     - Gemfile
                     - vendor/bundle
                     - _site
-
+    deploy:
+        working_directory: ~/build
+        environment:
+            - USER_NAME: "Richard Vodden"
+            - USER_EMAIL: "richard@vodden.com"
+        docker:
+            - image: circleci/ruby:2.4.3
+        requires:
+            - test
+        docker:
+            image: circleci/ruby:2.4.3
+        steps:
+            - attach_workspace:
+                at: ~/build
+            - run:
+                name: Deploy
+                command: ~/build/scripts/deploy.sh
 workflows:
     version: 2
     build-and-deploy:
