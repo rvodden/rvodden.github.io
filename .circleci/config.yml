@@ -11,6 +11,8 @@ jobs:
             - checkout
             - attach_workspace:
                 at: ~/build
+            - restore_cache:
+                key: bundle_{{ checksum "Gemfile.lock" }}
             - run:
                 name: Install Dependencies
                 command: bundle install --path vendor/bundle
