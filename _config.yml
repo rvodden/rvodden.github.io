@@ -6,6 +6,7 @@ twitter_username: rvodden
 github_username: rvodden
 linkedin_username: rvodden
 url: http://vodden.com/
+baseurl: ""
 defaults:
     -
         scope:
