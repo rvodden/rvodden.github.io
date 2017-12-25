@@ -1,7 +1,3 @@
----
-comments: true 
----
-
 # Let's Git ready to rumble
 
 ## Solving it

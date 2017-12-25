@@ -13,7 +13,8 @@ defaults:
             path: ""
             type: "posts"
         values:
-            layout: "default"
+            layout: "post"
+            comments: "true"
 
 ## Build Stuff
 
