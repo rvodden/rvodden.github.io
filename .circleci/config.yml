@@ -5,6 +5,7 @@ jobs:
         environment:
             - USER_NAME: "Richard Vodden"
             - USER_EMAIL: "richard@vodden.com"
+            - JEKYLL_ENV: "production"
         docker:
             - image: circleci/ruby:2.4.3
         steps:
