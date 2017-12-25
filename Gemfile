@@ -13,8 +13,8 @@ gem 'jekyll-assets'
 gem 'jekyll-seo-tag'
 gem 'jekyll-feed'
 gem 'html-proofer'
+gem 'uglifyer'
 gem 'minima', :git => 'git://github.com/rvodden/minima.git'
-
 gem "sprockets", "~> 4.0beto", {
   require: false
 }
