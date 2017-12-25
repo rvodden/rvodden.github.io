@@ -14,6 +14,7 @@ gem 'jekyll-seo-tag'
 gem 'jekyll-feed'
 gem 'html-proofer'
 gem 'uglifier'
+gem "therubyracer"
 gem 'minima', :git => 'git://github.com/rvodden/minima.git'
 gem "sprockets", "~> 4.0beto", {
   require: false
