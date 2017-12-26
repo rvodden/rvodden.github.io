@@ -1,3 +1,6 @@
+--- 
+published: false
+--- 
 # Let's have a proper Bash at this
 
 Much of the pipeline I work on is held together, at least a little bit,
