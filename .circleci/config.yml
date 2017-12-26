@@ -1,15 +1,21 @@
-version: 2
-jobs:
-    build:
-        working_directory: ~/build
+defaults: &defaults
+    working_directory: ~/build
         environment:
             - USER_NAME: "Richard Vodden"
             - USER_EMAIL: "richard@vodden.com"
             - JEKYLL_ENV: "production"
         docker:
             - image: circleci/ruby:2.4.3
+
+version: 2
+jobs:
+    build:
+        << *defaults
         steps:
             - checkout
+            - run:
+                name: Calculate dependencies into Gemfile.lock
+                command: rm Gemfile.lock && bundle lock
             - restore_cache:
                 key: bundle_{{ checksum "Gemfile.lock" }}
             - run:
@@ -31,12 +37,7 @@ jobs:
                     - vendor/bundle
                     - _site
     test:
-        working_directory: ~/build
-        environment:
-            - USER_NAME: "Richard Vodden"
-            - USER_EMAIL: "richard@vodden.com"
-        docker:
-            - image: circleci/ruby:2.4.3
+        << *defaults
         steps:
             - attach_workspace:
                 at: ~/build
@@ -47,12 +48,7 @@ jobs:
                 name: Validate HTML
                 command: bundle exec htmlproofer ./_site --assume-extension --disable-external
     deploy:
-        working_directory: ~/build
-        environment:
-            - USER_NAME: "Richard Vodden"
-            - USER_EMAIL: "richard@vodden.com"
-        docker:
-            - image: circleci/ruby:2.4.3
+        << *defaults
         steps:
             - attach_workspace:
                 at: ~/build
