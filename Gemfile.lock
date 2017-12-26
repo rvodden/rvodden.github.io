@@ -1,6 +1,7 @@
 GIT
   remote: git://github.com/rvodden/minima.git
-  revision: 19f35039623808d388ab955f7fe735fb87c56d51
+  revision: f1050d307f3ab178c714bc0dad557bc184e1aa97
+  branch: master
   specs:
     minima (2.1.1)
       jekyll (~> 3.5)
