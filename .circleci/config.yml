@@ -1,11 +1,11 @@
 defaults: &defaults
     working_directory: ~/build
-        environment:
-            - USER_NAME: "Richard Vodden"
-            - USER_EMAIL: "richard@vodden.com"
-            - JEKYLL_ENV: "production"
-        docker:
-            - image: circleci/ruby:2.4.3
+    environment:
+        - USER_NAME: "Richard Vodden"
+        - USER_EMAIL: "richard@vodden.com"
+        - JEKYLL_ENV: "production"
+    docker:
+        - image: circleci/ruby:2.4.3
 
 version: 2
 jobs:
