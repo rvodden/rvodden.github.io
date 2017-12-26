@@ -10,7 +10,7 @@ defaults: &defaults
 version: 2
 jobs:
     build:
-        << *defaults
+        <<: *defaults
         steps:
             - checkout
             - run:
@@ -37,7 +37,7 @@ jobs:
                     - vendor/bundle
                     - _site
     test:
-        << *defaults
+        <<: *defaults
         steps:
             - attach_workspace:
                 at: ~/build
@@ -48,7 +48,7 @@ jobs:
                 name: Validate HTML
                 command: bundle exec htmlproofer ./_site --assume-extension --disable-external
     deploy:
-        << *defaults
+        <<: *defaults
         steps:
             - attach_workspace:
                 at: ~/build
