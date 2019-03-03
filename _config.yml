@@ -45,3 +45,5 @@ exclude:
 plugins:
     - jekyll-assets
     - jekyll-feed
+    - jekyll-plantuml
+    - jekyll-seo-tag

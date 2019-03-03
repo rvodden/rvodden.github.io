@@ -12,10 +12,9 @@ gem 'jekyll-paginate-v2'
 gem 'jekyll-assets'
 gem 'jekyll-seo-tag'
 gem 'jekyll-feed'
+gem 'jekyll-plantuml'
 gem 'html-proofer'
 gem 'uglifier'
 gem 'therubyracer'
 gem 'minima', :git => 'git://github.com/rvodden/minima.git', branch: 'master'
-gem 'sprockets', '~> 4.0beto', {
-  require: false
-}
+gem 'sprockets'
