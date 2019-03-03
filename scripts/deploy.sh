@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eux pipefail
+set -euo pipefail
 
 # Variables
 ORIGIN_URL=$(git config --get remote.origin.url 2>&1)
