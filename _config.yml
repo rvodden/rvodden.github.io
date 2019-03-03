@@ -42,8 +42,14 @@ exclude:
     - CNAME
     - Gemfile.lock
 
+titles_from_headings:
+    enabled: true
+    strip_title: true
+    collections: true
+
 plugins:
     - jekyll-assets
     - jekyll-feed
     - jekyll-plantuml
     - jekyll-seo-tag
+    - jekyll-titles-from-headings

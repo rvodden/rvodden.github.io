@@ -82,6 +82,8 @@ GEM
       sass (~> 3.4)
     jekyll-seo-tag (2.5.0)
       jekyll (~> 3.3)
+    jekyll-titles-from-headings (0.5.1)
+      jekyll (~> 3.3)
     jekyll-watch (2.1.2)
       listen (~> 3.0)
     kramdown (1.17.0)
@@ -142,6 +144,7 @@ DEPENDENCIES
   jekyll-paginate-v2
   jekyll-plantuml
   jekyll-seo-tag
+  jekyll-titles-from-headings
   minima!
   sprockets
   therubyracer
