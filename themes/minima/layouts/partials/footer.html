@@ -1,0 +1,47 @@
+
+<footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">{{ .Site.Title }}</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>
+            {{ if .Site.Params.author }}
+              {{ .Site.Params.Author }}
+            {{ else }}
+              {{ .Site.Title }}
+            {{ end }}
+            </li>
+            {{ if .Site.Params.email }}
+            <li><a href="mailto:{{ .Site.Params.email }}">{{ .Site.Params.email }}</a></li>
+            {{ end }}
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          {{ if .Site.Params.githubUsername }}
+          <li>
+            {{- partial "icon-github.html" . -}}
+          </li>
+          {{ end }}
+
+          {{ if .Site.Params.twitterUsername }}
+          <li>
+            {{- partial "icon-twitter.html" . -}}
+          </li>
+          {{ end }}
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>{{ .Site.Params.Description }}</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>

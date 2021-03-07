@@ -1,0 +1,24 @@
+baseURL = "http://vodden.com/"
+languageCode = "en-gb"
+title = "Garbage Collection"
+theme = "minima"
+enableGitInfo = true
+pygmentsUseClasses=true
+
+[params]
+  Environment = "Production"
+  author = "Richard Vodden"
+  email = "richard@vodden.com"
+  Description = "This is a collection of all the garbage which comes out of my mind."
+  githubUsername = "rvodden"
+  twitterUsername = "rvodden"
+
+[frontmatter]
+  date = ["date", ":filename", "lastmod"]
+  publishDate = ["publishDate", "date"]
+  lastmod = [":git", "date"]
+
+[markup]
+  [marKup.highlight]
+    lineNos = true
+    anchorLineNos = true
