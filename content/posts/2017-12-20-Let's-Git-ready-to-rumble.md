@@ -1,6 +1,6 @@
 ---
 title: Let's Git ready to rumble
-draft: True
+draft: False
 ---
 # Let's Git ready to rumble
 

@@ -7,3 +7,7 @@ I am a DevOps SME and Agile Coach. Equally comfortable driving a DevOps transfor
 I take a particular interest in the development process, and encourage an approach which focuses on observation and continuous improvement. I have helped several large scale projects move to a "DevOps" approach; not only by embracing the necessary technology, but by recognizing rapid releases as a cultural and organisational change.
 
 I am a fast paced worker and have been described as having "the kind of infectious enthusiasm around which people can't help but deliver". I am committed to the development of staff and colleagues around me and as such I have a history of leading and motivating teams through the most challenging of projects.
+
+[My Public SSH Key](/keys/rvodden_public_ssh2.txt)
+
+[My Public GPG Key](/keys/rvodden_public_gpg.txt)

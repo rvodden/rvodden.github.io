@@ -1,4 +1,4 @@
-baseURL = "http://vodden.com/"
+baseURL = "https://vodden.com/"
 languageCode = "en-gb"
 title = "Garbage Collection"
 theme = "minima"
@@ -7,7 +7,7 @@ pygmentsUseClasses=true
 
 [params]
   Environment = "Production"
-  author = "Richard Vodden"
+  Author = "Richard Vodden"
   email = "richard@vodden.com"
   Description = "This is a collection of all the garbage which comes out of my mind."
   githubUsername = "rvodden"
