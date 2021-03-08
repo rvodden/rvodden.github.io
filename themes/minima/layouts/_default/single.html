@@ -5,7 +5,7 @@
     <h1 class="post-title" itemprop="name headline">{{ .Title }}</h1>
     <p class="post-meta">
       <time datetime="{{ .Date.Format "2006-02-01" }}" itemprop="datePublished">
-        {{ .Date.Format "January 2nd, 2006" }}
+        {{ partial "date.html" .Date }}
       </time>
       {{ if (isset .Params "Author" ) }}
         • <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">{{ .Params.Author }}</span></span>

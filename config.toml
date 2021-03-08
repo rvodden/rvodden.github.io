@@ -19,6 +19,17 @@ pygmentsUseClasses=true
   lastmod = [":git", "date"]
 
 [markup]
-  [marKup.highlight]
+  [markup.highlight]
     lineNos = true
     anchorLineNos = true
+  [markup.goldmark]
+    [markup.goldmark.extensions]
+      definitionList = true
+      footnote = true
+      linkify = true
+      strikethrough = true
+      table = true
+      taskList = true
+      typographer = true
+    [markup.goldmark.renderer]
+      unsafe = true

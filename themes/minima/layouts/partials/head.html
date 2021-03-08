@@ -1,10 +1,38 @@
 <head>
+  <title>{{ .Title }}</title>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$','$'], ['\\(','\\)']],
+      displayMath: [['$$','$$'], ['\[','\]']],
+      processEscapes: true,
+      processEnvironments: true
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+    },
+    startup: {
+      pageReady() {
+        return MathJax.startup.defaultPageReady().then(function () {
+          var all = window.MathJax.startup.document.getMathItemsWithin(document.body), i;
+          for(i = 0; i < all.length; i += 1) {
+            console.log(all[i])
+            all[i].start.node.parentNode.className += ' has-jax';
+          }
+        });
+      }
+    }
+  };
+  </script>
+
+
   {{ $style := resources.Get "scss/minima.scss" | resources.ToCSS | resources.Fingerprint}}
   <link rel="stylesheet" href="{{ $style.RelPermalink }}" integrity="{{$style.Data.Integrity}}">
   {{ range .AlternativeOutputFormats -}}

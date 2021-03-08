@@ -28,6 +28,13 @@ ul, ol, dl, figure,
   margin-bottom: 0em;
 }
 
+code.has-jax {
+  font: inherit; 
+  font-size: 100%; 
+  background: inherit; 
+  border: inherit;
+}
+
 // Images
 img {
   max-width: 100%;
