@@ -2,8 +2,6 @@
 title: Let's Git ready to rumble
 draft: False
 ---
-# Let's Git ready to rumble
-
 ## Solving it
 
 If found myself with a rather strange git problem. As far as I was aware,

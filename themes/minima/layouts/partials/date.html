@@ -1,0 +1,1 @@
+{{ .Format "2" }}{{ if in (slice 1 21 31) .Day}}st{{ else if in (slice 2 22) .Day}}nd{{ else if in (slice 3 23) .Day}}rd{{ else }}th{{ end }} {{ .Format "January, 2006" }}

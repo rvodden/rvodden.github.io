@@ -8,11 +8,11 @@
   <ul class="post-list">
     {{ range first 10 (where .Site.RegularPages "Section" "posts" ) }}
       <li>
-        <span class="post-meta">{{ .Date.Format "January 2nd, 2006" }}</span>
-
         <h2>
           <a class="post-link" href="{{ .RelPermalink }}">{{ .Title }}</a>
         </h2>
+        <span class="post-meta">{{ partial "date.html" .Date }}</span>
+
       </li>
     {{ end }}
   </ul>

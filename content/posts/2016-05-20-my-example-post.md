@@ -1,5 +1,5 @@
 ---
-title: my example post
+title: My Example Post
 draft: True
 ---
 
