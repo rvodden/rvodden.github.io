@@ -1,0 +1,118 @@
+<!doctype html><html lang=en><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge"><meta name=viewport content="width=device-width,initial-scale=1"><script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script><script id=MathJax-script async src=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js></script><script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['[',']']],processEscapes:!0,processEnvironments:!0},options:{skipHtmlTags:['script','noscript','style','textarea','pre']},startup:{pageReady(){return MathJax.startup.defaultPageReady().then(function(){var b=window.MathJax.startup.document.getMathItemsWithin(document.body),a;for(a=0;a<b.length;a+=1)console.log(b[a]),b[a].start.node.parentNode.className+=' has-jax'})}}}</script><link rel=stylesheet href=/scss/minima.59ba1a79cecfac79fd32436bcde7df9e06d3111ce4e1b67e0f24a1666df0cea7.css integrity="sha256-Wboaec7PrHn9MkNrzeffngbTERzk4bZ+DyShZm3wzqc="><meta property="og:title" content="MathJax and Hugo"><meta property="og:description" content="The is a marvelous article which explains how to use Hugo and MathJax in close harmony. Unfortunately it was written a while ago and only works for MathJax 2.x. This article updates the content of the original to MathJax > 3.1. The original is still worth reading as it nicely explains the functionality.
+Firstly MathJax > 3.0 likes to have pollyfill. So the script inclusion should look like this:
+1 2  <script src=&#34;https://polyfill."><meta property="og:type" content="article"><meta property="og:url" content="https://vodden.com/posts/mathjax-and-hugo/"><meta property="article:section" content="posts"><meta property="article:modified_time" content="2021-03-08T18:32:08+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="MathJax and Hugo"><meta name=twitter:description content="The is a marvelous article which explains how to use Hugo and MathJax in close harmony. Unfortunately it was written a while ago and only works for MathJax 2.x. This article updates the content of the original to MathJax > 3.1. The original is still worth reading as it nicely explains the functionality.
+Firstly MathJax > 3.0 likes to have pollyfill. So the script inclusion should look like this:
+1 2  <script src=&#34;https://polyfill."></head><body><header class=site-header role=banner><div class=wrapper><a class=site-title href=https://vodden.com/><img src=/truck.svg alt="Garbage Truck by Mat fine from the Noun Project" width=65px height=65px>
+Garbage Collection</a><nav class=site-nav><input type=checkbox id=nav-trigger class=nav-trigger>
+<label for=nav-trigger><span class=menu-icon><svg viewBox="0 0 18 15" width="18" height="15"><path fill="#424242" d="M18 1.484c0 .82-.665 1.484-1.484 1.484H1.484C.665 2.969.0 2.304.0 1.484.0.665.665.0 1.484.0h15.031C17.335.0 18 .665 18 1.484z"/><path fill="#424242" d="M18 7.516C18 8.335 17.335 9 16.516 9H1.484C.665 9 0 8.335.0 7.516c0-.82.665-1.484 1.484-1.484h15.031C17.335 6.031 18 6.696 18 7.516z"/><path fill="#424242" d="M18 13.516C18 14.335 17.335 15 16.516 15H1.484C.665 15 0 14.335.0 13.516c0-.82.665-1.484 1.484-1.484h15.031C17.335 12.031 18 12.696 18 13.516z"/></svg></span></label><div class=trigger><a class=page-link href=/about/>Richard Vodden</a></div></nav></div></header><main class=page-content aria-label=Content><div class=wrapper><article class=post itemscope itemtype=http://schema.org/BlogPosting><header class=post-header><h1 class=post-title itemprop="name headline">MathJax and Hugo</h1><p class=post-meta><time datetime=2021-07-03 itemprop=datePublished>7<sup>th</sup> February, 2021</time></p></header><div class=post-content itemprop=articleBody><p>The is a <a href=https://bwaycer.github.io/hugo_tutorial.hugo/tutorials/mathjax/>marvelous article</a> which explains how to use <a href=https://gohugo.io/>Hugo</a> and <a href=https://www.mathjax.org/>MathJax</a> in close harmony. Unfortunately it was written a while ago and only works for MathJax 2.x. This article updates the content of the original to MathJax > 3.1. The original is still worth reading as it nicely explains the functionality.</p><p>Firstly MathJax > 3.0 likes to have pollyfill. So the script inclusion should look like this:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2>2</a>
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-html data-lang=html><span class=p>&lt;</span><span class=nt>script</span> <span class=na>src</span><span class=o>=</span><span class=s>&#34;https://polyfill.io/v3/polyfill.min.js?features=es6&#34;</span><span class=p>&gt;&lt;/</span><span class=nt>script</span><span class=p>&gt;</span>
+<span class=p>&lt;</span><span class=nt>script</span> <span class=na>id</span><span class=o>=</span><span class=s>&#34;MathJax-script&#34;</span> <span class=na>async</span> <span class=na>src</span><span class=o>=</span><span class=s>&#34;https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js&#34;</span><span class=p>&gt;&lt;/</span><span class=nt>script</span><span class=p>&gt;</span>
+</code></pre></td></tr></table></div></div><p>The solution to the problem of having to escape <em>many</em> characters in LaTeX markup is solved in a simlar manner, however a combination of Hugo now using the <a href=https://github.com/yuin/goldmark>Goldmark</a> renderer and the MathJax API changing quite significantly at version 3.0, it largely needs re-writing. Firstly the script to add the class to the code blocks now looks like this:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2> 2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3> 3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4> 4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7> 7</a>
+</span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8> 8</a>
+</span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9> 9</a>
+</span><span class=lnt id=10><a style=outline:none;text-decoration:none;color:inherit href=#10>10</a>
+</span><span class=lnt id=11><a style=outline:none;text-decoration:none;color:inherit href=#11>11</a>
+</span><span class=lnt id=12><a style=outline:none;text-decoration:none;color:inherit href=#12>12</a>
+</span><span class=lnt id=13><a style=outline:none;text-decoration:none;color:inherit href=#13>13</a>
+</span><span class=lnt id=14><a style=outline:none;text-decoration:none;color:inherit href=#14>14</a>
+</span><span class=lnt id=15><a style=outline:none;text-decoration:none;color:inherit href=#15>15</a>
+</span><span class=lnt id=16><a style=outline:none;text-decoration:none;color:inherit href=#16>16</a>
+</span><span class=lnt id=17><a style=outline:none;text-decoration:none;color:inherit href=#17>17</a>
+</span><span class=lnt id=18><a style=outline:none;text-decoration:none;color:inherit href=#18>18</a>
+</span><span class=lnt id=19><a style=outline:none;text-decoration:none;color:inherit href=#19>19</a>
+</span><span class=lnt id=20><a style=outline:none;text-decoration:none;color:inherit href=#20>20</a>
+</span><span class=lnt id=21><a style=outline:none;text-decoration:none;color:inherit href=#21>21</a>
+</span><span class=lnt id=22><a style=outline:none;text-decoration:none;color:inherit href=#22>22</a>
+</span><span class=lnt id=23><a style=outline:none;text-decoration:none;color:inherit href=#23>23</a>
+</span><span class=lnt id=24><a style=outline:none;text-decoration:none;color:inherit href=#24>24</a>
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-html data-lang=html><span class=p>&lt;</span><span class=nt>script</span><span class=p>&gt;</span>
+  <span class=nb>window</span><span class=p>.</span><span class=nx>MathJax</span> <span class=o>=</span> <span class=p>{</span>
+    <span class=nx>tex</span><span class=o>:</span> <span class=p>{</span>
+      <span class=nx>inlineMath</span><span class=o>:</span> <span class=p>[[</span><span class=s1>&#39;$&#39;</span><span class=p>,</span><span class=s1>&#39;$&#39;</span><span class=p>],</span> <span class=p>[</span><span class=s1>&#39;\\(&#39;</span><span class=p>,</span><span class=s1>&#39;\\)&#39;</span><span class=p>]],</span>
+      <span class=nx>displayMath</span><span class=o>:</span> <span class=p>[[</span><span class=s1>&#39;$$&#39;</span><span class=p>,</span><span class=s1>&#39;$$&#39;</span><span class=p>],</span> <span class=p>[</span><span class=s1>&#39;\[&#39;</span><span class=p>,</span><span class=s1>&#39;\]&#39;</span><span class=p>]],</span>
+      <span class=nx>processEscapes</span><span class=o>:</span> <span class=kc>true</span><span class=p>,</span>
+      <span class=nx>processEnvironments</span><span class=o>:</span> <span class=kc>true</span>
+    <span class=p>},</span>
+    <span class=nx>options</span><span class=o>:</span> <span class=p>{</span>
+      <span class=nx>skipHtmlTags</span><span class=o>:</span> <span class=p>[</span><span class=s1>&#39;script&#39;</span><span class=p>,</span> <span class=s1>&#39;noscript&#39;</span><span class=p>,</span> <span class=s1>&#39;style&#39;</span><span class=p>,</span> <span class=s1>&#39;textarea&#39;</span><span class=p>,</span> <span class=s1>&#39;pre&#39;</span><span class=p>]</span>
+    <span class=p>},</span>
+    <span class=nx>startup</span><span class=o>:</span> <span class=p>{</span>
+      <span class=nx>pageReady</span><span class=p>()</span> <span class=p>{</span>
+        <span class=k>return</span> <span class=nx>MathJax</span><span class=p>.</span><span class=nx>startup</span><span class=p>.</span><span class=nx>defaultPageReady</span><span class=p>().</span><span class=nx>then</span><span class=p>(</span><span class=kd>function</span> <span class=p>()</span> <span class=p>{</span>
+          <span class=kd>var</span> <span class=nx>all</span> <span class=o>=</span> <span class=nb>window</span><span class=p>.</span><span class=nx>MathJax</span><span class=p>.</span><span class=nx>startup</span><span class=p>.</span><span class=nb>document</span><span class=p>.</span><span class=nx>getMathItemsWithin</span><span class=p>(</span><span class=nb>document</span><span class=p>.</span><span class=nx>body</span><span class=p>),</span> <span class=nx>i</span><span class=p>;</span>
+          <span class=k>for</span><span class=p>(</span><span class=nx>i</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>i</span> <span class=o>&lt;</span> <span class=nx>all</span><span class=p>.</span><span class=nx>length</span><span class=p>;</span> <span class=nx>i</span> <span class=o>+=</span> <span class=mi>1</span><span class=p>)</span> <span class=p>{</span>
+            <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=nx>all</span><span class=p>[</span><span class=nx>i</span><span class=p>])</span>
+            <span class=nx>all</span><span class=p>[</span><span class=nx>i</span><span class=p>].</span><span class=nx>start</span><span class=p>.</span><span class=nx>node</span><span class=p>.</span><span class=nx>parentNode</span><span class=p>.</span><span class=nx>className</span> <span class=o>+=</span> <span class=s1>&#39; has-jax&#39;</span><span class=p>;</span>
+          <span class=p>}</span>
+        <span class=p>});</span>
+      <span class=p>}</span>
+    <span class=p>}</span>
+  <span class=p>};</span>
+  <span class=p>&lt;/</span><span class=nt>script</span><span class=p>&gt;</span>
+</code></pre></td></tr></table></div></div><p>Now, by default, the Goldmark renderer does not permit raw html in markdown, instead converting it to a comment. To change this behaviour the Hugo configuration needs the following code added:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2>2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3>3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4>4</a>
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-toml data-lang=toml><span class=p>[</span><span class=nx>markup</span><span class=p>]</span>
+  <span class=p>[</span><span class=nx>markup</span><span class=p>.</span><span class=nx>goldmark</span><span class=p>]</span>
+    <span class=p>[</span><span class=nx>markup</span><span class=p>.</span><span class=nx>goldmark</span><span class=p>.</span><span class=nx>renderer</span><span class=p>]</span>
+      <span class=nx>unsafe</span> <span class=p>=</span> <span class=kc>true</span>
+</code></pre></td></tr></table></div></div><p>Now, LaTeX can be included in <code>&lt;div></code> tags without worrying about having to escape either <code>_</code> or <code>\</code> characters. The following code:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2> 2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3> 3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4> 4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7> 7</a>
+</span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8> 8</a>
+</span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9> 9</a>
+</span><span class=lnt id=10><a style=outline:none;text-decoration:none;color:inherit href=#10>10</a>
+</span><span class=lnt id=11><a style=outline:none;text-decoration:none;color:inherit href=#11>11</a>
+</span><span class=lnt id=12><a style=outline:none;text-decoration:none;color:inherit href=#12>12</a>
+</span><span class=lnt id=13><a style=outline:none;text-decoration:none;color:inherit href=#13>13</a>
+</span><span class=lnt id=14><a style=outline:none;text-decoration:none;color:inherit href=#14>14</a>
+</span><span class=lnt id=15><a style=outline:none;text-decoration:none;color:inherit href=#15>15</a>
+</span><span class=lnt id=16><a style=outline:none;text-decoration:none;color:inherit href=#16>16</a>
+</span><span class=lnt id=17><a style=outline:none;text-decoration:none;color:inherit href=#17>17</a>
+</span><span class=lnt id=18><a style=outline:none;text-decoration:none;color:inherit href=#18>18</a>
+</span></code></pre></td><td class=lntd><pre class=chroma><code class=language-html data-lang=html><span class=p>&lt;</span><span class=nt>div</span><span class=p>&gt;</span>
+$$
+\begin{align*}
+  \phi(x,y) <span class=err>&amp;</span>= \phi \left(\sum_{i=1}^n x_ie_i, \sum_{j=1}^n y_je_j \right) \\
+  <span class=err>&amp;</span>= \sum_{i=1}^n \sum_{j=1}^n x_i y_j \phi(e_i, e_j) \\
+  <span class=err>&amp;</span>= (x_1, \ldots, x_n) \left( \begin{array}{ccc}
+      \phi(e_1, e_1) <span class=err>&amp;</span> \cdots <span class=err>&amp;</span> \phi(e_1, e_n) \\
+      \vdots <span class=err>&amp;</span> \ddots <span class=err>&amp;</span> \vdots \\
+      \phi(e_n, e_1) <span class=err>&amp;</span> \cdots <span class=err>&amp;</span> \phi(e_n, e_n)
+    \end{array} \right)
+  \left( \begin{array}{c}
+      y_1 \\
+      \vdots \\
+      y_n
+    \end{array} \right)
+\end{align*}
+$$
+<span class=p>&lt;/</span><span class=nt>div</span><span class=p>&gt;</span>
+</code></pre></td></tr></table></div></div><p>renders as:</p><div>$$
+\begin{align*}
+\phi(x,y) &= \phi \left(\sum_{i=1}^n x_ie_i, \sum_{j=1}^n y_je_j \right) \\
+&= \sum_{i=1}^n \sum_{j=1}^n x_i y_j \phi(e_i, e_j) \\
+&= (x_1, \ldots, x_n) \left( \begin{array}{ccc}
+\phi(e_1, e_1) & \cdots & \phi(e_1, e_n) \\
+      \vdots & \ddots & \vdots \\
+      \phi(e_n, e_1) & \cdots & \phi(e_n, e_n)
+    \end{array} \right)
+\left( \begin{array}{c}
+y_1 \\
+\vdots \\
+y_n
+\end{array} \right)
+\end{align*}
+$$</div></div></article></div></main><footer class=site-footer><div class=wrapper><h2 class=footer-heading>Garbage Collection</h2><div class=footer-col-wrapper><div class="footer-col footer-col-1"><ul class=contact-list><li>Richard Vodden</li><li><a href=mailto:richard@vodden.com>richard@vodden.com</a></li></ul></div><div class="footer-col footer-col-2"><ul class=social-media-list><li><a href=https://github.com/rvodden><span class="icon icon--github"><svg viewBox="0 0 16 16" width="16" height="16"><path fill="#828282" d="M7.999.431C3.714.431.239 3.905.239 8.192c0 3.428 2.223 6.337 5.307 7.363.388.071.53-.168.53-.374.0-.184-.007-.672-.01-1.32-2.159.469-2.614-1.04-2.614-1.04-.353-.896-.862-1.135-.862-1.135-.705-.481.053-.472.053-.472.779.055 1.189.8 1.189.8.692 1.186 1.816.843 2.258.645.071-.502.271-.843.493-1.037C4.86 11.425 3.049 10.76 3.049 7.786c0-.847.302-1.54.799-2.082C3.768 5.507 3.501 4.718 3.924 3.65c0 0 .652-.209 2.134.796C6.677 4.273 7.34 4.187 8 4.184c.659.003 1.323.089 1.943.261 1.482-1.004 2.132-.796 2.132-.796.423 1.068.157 1.857.077 2.054.497.542.798 1.235.798 2.082.0 2.981-1.814 3.637-3.543 3.829.279.24.527.713.527 1.437.0 1.037-.01 1.874-.01 2.129.0.208.14.449.534.373 3.081-1.028 5.302-3.935 5.302-7.362.0-4.285-3.475-7.76-7.761-7.76z"/></svg></span><span class=username>rvodden</span></a></li><li><a href=https://twitter.com/rvodden><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16" height="16"><path fill="#828282" d="M15.969 3.058c-.586.26-1.217.436-1.878.515.675-.405 1.194-1.045 1.438-1.809-.632.375-1.332.647-2.076.793-.596-.636-1.446-1.033-2.387-1.033-1.806.0-3.27 1.464-3.27 3.27.0.256.029.506.085.745C5.163 5.404 2.753 4.102 1.14 2.124.859 2.607.698 3.168.698 3.767c0 1.134.577 2.135 1.455 2.722C1.616 6.472 1.112 6.325.671 6.08c0 .014.0.027.0.041.0 1.584 1.127 2.906 2.623 3.206C3.02 9.402 2.731 9.442 2.433 9.442c-.211.0-.416-.021-.615-.059.416 1.299 1.624 2.245 3.055 2.271-1.119.877-2.529 1.4-4.061 1.4-.264.0-.524-.015-.78-.046 1.447.928 3.166 1.469 5.013 1.469 6.015.0 9.304-4.983 9.304-9.304.0-.142-.003-.283-.009-.423C14.976 4.29 15.531 3.714 15.969 3.058z"/></svg></span><span class=username>rvodden</span></a></li></ul></div><div class="footer-col footer-col-3"><p>This is a collection of all the garbage which comes out of my mind.</p></div></div></div></footer></body></html>

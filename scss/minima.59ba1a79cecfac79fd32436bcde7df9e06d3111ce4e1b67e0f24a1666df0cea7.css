@@ -22,6 +22,12 @@ ul, ol, dl, figure,
 .post-list h2 {
   margin-bottom: 0em; }
 
+code.has-jax {
+  font: inherit;
+  font-size: 100%;
+  background: inherit;
+  border: inherit; }
+
 img {
   max-width: 100%;
   vertical-align: middle; }
