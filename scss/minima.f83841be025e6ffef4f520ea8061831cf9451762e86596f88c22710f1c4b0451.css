@@ -264,6 +264,11 @@ table {
 .post-link {
   font-size: 24px;
   display: block;
+  color: #000; }
+
+.post-series {
+  font-size: 24px;
+  display: block;
   font-size: 14px; }
 
 .post-header {
@@ -436,3 +441,5 @@ table {
     color: #008080; }
   .highlight .il {
     color: #099; }
+
+/*# sourceMappingURL=minima.css.map */
