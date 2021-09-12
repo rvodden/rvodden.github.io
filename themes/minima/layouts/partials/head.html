@@ -32,8 +32,8 @@
   };
   </script>
 
-
-  {{ $style := resources.Get "scss/minima.scss" | resources.ToCSS | resources.Fingerprint}}
+  {{ $options := (dict "enableSourceMap" true) }}
+  {{ $style := resources.Get "scss/minima.scss" | resources.ToCSS $options | resources.Fingerprint}}
   <link rel="stylesheet" href="{{ $style.RelPermalink }}" integrity="{{$style.Data.Integrity}}">
   {{ range .AlternativeOutputFormats -}}
     {{ printf `<link rel="%s" type="%s" href="%s" title="%s" />` .Rel .MediaType.Type .Permalink $.Site.Title | safeHTML }}

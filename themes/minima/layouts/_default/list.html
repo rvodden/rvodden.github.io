@@ -1,0 +1,26 @@
+{{ define "main" }}
+<div class="home">
+
+  {{ .Content }}
+
+  <h1 class="page-heading">{{ .Title }}</h1>
+  
+  <ul class="post-list">
+    {{ range .Pages }}
+      <li>
+        <h2>
+          <a class="post-link" href="{{ .RelPermalink }}">{{ .Title }}</a>
+        </h2>
+        <span class="post-meta">{{ partial "date.html" .Date }}</span>
+        <p>{{ .Description }}</p>
+
+      </li>
+    {{ end }}
+  </ul>
+
+    {{/* 
+  <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" }}">via RSS</a></p>
+*/}}
+
+</div>
+{{ end }}

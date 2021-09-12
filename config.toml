@@ -5,6 +5,11 @@ theme = "minima"
 enableGitInfo = true
 pygmentsUseClasses=true
 
+[taxonomies]
+  category = 'categories'
+  tag = 'tags'
+  series = 'series'
+
 [params]
   Environment = "Production"
   Author = "Richard Vodden"

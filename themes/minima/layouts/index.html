@@ -10,6 +10,9 @@
       <li>
         <h2>
           <a class="post-link" href="{{ .RelPermalink }}">{{ .Title }}</a>
+          {{ range (.GetTerms "series") }}
+             <a class = "post-series" href="{{ .Permalink }}">({{ .LinkTitle }})</a>
+          {{ end }}
         </h2>
         <span class="post-meta">{{ partial "date.html" .Date }}</span>
 

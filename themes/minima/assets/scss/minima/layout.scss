@@ -185,6 +185,13 @@
 .post-link {
   @include relative-font-size(1.5);
   display: block;
+  // font-size: $small-font-size;
+  color: $black
+}
+
+.post-series {
+  @include relative-font-size(1.5);
+  display: block;
   font-size: $small-font-size;
 }
 
