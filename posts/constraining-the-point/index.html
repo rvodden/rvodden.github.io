@@ -1,0 +1,1063 @@
+<!doctype html><html lang=en><head>
+<title>Constraining the Point</title>
+<meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1">
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id=MathJax-script async src=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js></script>
+<script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['[',']']],processEscapes:!0,processEnvironments:!0},options:{skipHtmlTags:['script','noscript','style','textarea','pre']},startup:{pageReady(){return MathJax.startup.defaultPageReady().then(function(){var b=window.MathJax.startup.document.getMathItemsWithin(document.body),a;for(a=0;a<b.length;a+=1)console.log(b[a]),b[a].start.node.parentNode.className+=' has-jax'})}}}</script>
+<link rel=stylesheet href=/scss/minima.f83841be025e6ffef4f520ea8061831cf9451762e86596f88c22710f1c4b0451.css integrity="sha256-+DhBvgJeb/709SDqgGGDHPlFF2LoZZb4jCJxDxxLBFE=">
+<meta property="og:title" content="Constraining the Point">
+<meta property="og:description" content="We look at how we might represent a set of geometric relationships in a class hierarchy. We partially implement this for a `Point` object, and consider the developer experience.
+">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://vodden.com/posts/constraining-the-point/"><meta property="article:section" content="posts">
+<meta property="article:modified_time" content="2021-09-12T19:58:32+01:00">
+<meta name=twitter:card content="summary">
+<meta name=twitter:title content="Constraining the Point">
+<meta name=twitter:description content="We look at how we might represent a set of geometric relationships in a class hierarchy. We partially implement this for a `Point` object, and consider the developer experience.
+">
+</head><body><header class=site-header role=banner>
+<div class=wrapper>
+<a class=site-title href=https://vodden.com/>
+<img src=/truck.svg alt="Garbage Truck by Mat fine from the Noun Project" width=65px height=65px>
+Garbage Collection
+</a>
+<nav class=site-nav>
+<input type=checkbox id=nav-trigger class=nav-trigger>
+<label for=nav-trigger>
+<span class=menu-icon><svg viewBox="0 0 18 15" width="18" height="15"><path fill="#424242" d="M18 1.484c0 .82-.665 1.484-1.484 1.484H1.484C.665 2.969.0 2.304.0 1.484.0.665.665.0 1.484.0h15.031C17.335.0 18 .665 18 1.484z"/><path fill="#424242" d="M18 7.516C18 8.335 17.335 9 16.516 9H1.484C.665 9 0 8.335.0 7.516c0-.82.665-1.484 1.484-1.484h15.031C17.335 6.031 18 6.696 18 7.516z"/><path fill="#424242" d="M18 13.516C18 14.335 17.335 15 16.516 15H1.484C.665 15 0 14.335.0 13.516c0-.82.665-1.484 1.484-1.484h15.031C17.335 12.031 18 12.696 18 13.516z"/></svg>
+</span>
+</label>
+<div class=trigger>
+<a class=page-link href=/about/>Richard Vodden</a>
+</div>
+</nav>
+</div>
+</header>
+<main class=page-content aria-label=Content>
+<div class=wrapper>
+<article class=post itemscope itemtype=http://schema.org/BlogPosting>
+<header class=post-header>
+<h1 class=post-title itemprop="name headline">Constraining the Point</h1>
+<p class=post-meta>
+<time datetime=2021-06-09 itemprop=datePublished>
+6<sup>th</sup> February, 2021
+</time>
+</p>
+</header>
+<div class=post-content itemprop=articleBody>
+<p><a href=https://github.com/rvodden/pysketcher>PySketcher</a> is little library which I maintain which makes it simple (hopefully) to draw geometric images. It was originally written by Hans Petter Langtangen, who sadly passed away in 2016, and since 2019 I&rsquo;ve been keeping it up to date and adding features.</p>
+<p>Right now, PySketcher only supports absolute positioning of shapes. This means that you have to know exactly where you&rsquo;d like the center of your circle to be and exactly what radius it should have.</p>
+<p>I&rsquo;d like to add a facility for a user to describe the various geometric features and relationships which the shapes have, as well as potentially being able to specify the properties absolutely. So instead of saying &ldquo;I&rsquo;d like to have a circle of radius $3$ and centered at the point $(0,0)$, a user could say &ldquo;Please create me a circle which is centered where these two lines cross and is tangent to this other line.&rdquo;</p>
+<p>This presents some interesting challenges:</p>
+<ol>
+<li>How will the relationships between the shapes be represented.</li>
+<li>Once the relationships are understood, how will we work out where the shapes should go? Can we do this without creating performance issues?</li>
+<li>What should the experience be for the developer coding a diagram when they want to represent relationships in code?</li>
+</ol>
+<p>At first glance it may look like the first and last items are the same. In fact, the representation and the developer experience are separate concerns. For example if I wish to specify that two lines are parallel, I am constraining the gradient of the 2<sup>nd</sup> line to be the same as the first. I don&rsquo;t think there is any argument that the concept of &ldquo;parallel&rdquo; is more intuitive, however a gradient equality constraint may make more sense from an implementation perspective.</p>
+<p>So over a series of articles, I shall explore each of these challenges. This will hopefully be interesting to some readers, and will also help document my thought processes. That way when in two years I look at my code and think &ldquo;Why on earth did you to that?&rdquo; I may have some way of understanding my original justification.</p>
+<h2 id=the-problem>The Problem</h2>
+<p>In this article let&rsquo;s focus on the problem of how to represent the relationships between shapes internally to PySketcher. This is probably a little backwards, as we&rsquo;d usually like to consider how the users (or developers in this instance) interact with the library before we look at the internals, but in this instance looking at the internals gives us a quite valuable insight into the art of the possible. And we won&rsquo;t completely ignore the developers - we&rsquo;ll look at the internals whilst considering what potential options that opens up for our API in part 3.</p>
+<p>So we&rsquo;d like for PySketcher to enable us to specify a number of shapes, and for us to then specify how those shapes interact, and for this to be represented somehow internally. We&rsquo;ll leave the problem of working out what the shapes end up looking like to part 2. I think it&rsquo;s useful to think about what we&rsquo;re actually saying when we specify a relationship, and I return to the example of parallelization which I briefly mentioned earlier. If we say that a line is parallel to another line, then we are restricting the values which its gradient can take. This means that we may not know what the gradient of the line is when we create it, but instead we&rsquo;ll need to allow it to be worked out later. Perhaps more subtle is to realise that we may not know what the gradient is when we assign that constraint. If we assert that one line is parallel to another, but don&rsquo;t yet know the gradient of that other line (as we&rsquo;ve not yet asserted all the constraints in the diagram), then we will be unable to assign the value of the gradient at assignment time. So we need a means to:</p>
+<ol>
+<li>Represent that a shape has some property or value without knowing what that value might be (yet).</li>
+<li>Be able to assign constraints to that property or value.</li>
+<li>Trigger the calculation of the value on the basis of the constraints.</li>
+</ol>
+<h2 id=constrained-thinking>Constrained Thinking</h2>
+<p>Let&rsquo;s have a look at how we might implement this. As with all my python articles, where you see a line which says <code>#...</code> that means I&rsquo;ve omitted some code for clarity, and usually that code is code from a previous example. Let&rsquo;s start by defining a class which holds a list of constraints, and has a <code>resolve</code> method to work out a final value from those constraints. As I mentioned earlier, in this article we won&rsquo;t concern ourselves with how we calculate that value, right now we&rsquo;re just interested in how we might represent objects which might be constrained:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2> 2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3> 3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4> 4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7> 7</a>
+</span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8> 8</a>
+</span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9> 9</a>
+</span><span class=lnt id=10><a style=outline:none;text-decoration:none;color:inherit href=#10>10</a>
+</span><span class=lnt id=11><a style=outline:none;text-decoration:none;color:inherit href=#11>11</a>
+</span><span class=lnt id=12><a style=outline:none;text-decoration:none;color:inherit href=#12>12</a>
+</span><span class=lnt id=13><a style=outline:none;text-decoration:none;color:inherit href=#13>13</a>
+</span><span class=lnt id=14><a style=outline:none;text-decoration:none;color:inherit href=#14>14</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>ConstrainedValue</span><span class=p>():</span>
+    <span class=s2>&#34;&#34;&#34;An object which can be passed around to represent a value.&#34;&#34;&#34;</span>
+
+    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=p>:</span> <span class=n>List</span><span class=p>[</span><span class=n>Constraint</span><span class=p>]</span> <span class=o>=</span> <span class=p>[]</span>
+
+    <span class=k>def</span> <span class=nf>constrain_with</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>constraint</span><span class=p>):</span>
+        <span class=s2>&#34;&#34;&#34;Add a constraint to this objects list of constraints.&#34;&#34;&#34;</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>constraint</span><span class=p>)</span>
+
+    <span class=k>def</span> <span class=nf>resolve</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=s2>&#34;&#34;&#34;Leave to specific implementations to calculate the value on the basis
+</span><span class=s2>        of constraints.&#34;&#34;&#34;</span>
+        <span class=k>raise</span> <span class=ne>NotImplementedError</span><span class=p>(</span><span class=s2>&#34;`resolve` has not yet been implemented.&#34;</span><span class=p>)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>Let&rsquo;s also think about what a constraint might look like. I&rsquo;ll define an abstract constraint and the implement the simplest example of a constraint - a constraint which ties the object to a fixed value.</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2> 2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3> 3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4> 4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7> 7</a>
+</span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8> 8</a>
+</span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9> 9</a>
+</span><span class=lnt id=10><a style=outline:none;text-decoration:none;color:inherit href=#10>10</a>
+</span><span class=lnt id=11><a style=outline:none;text-decoration:none;color:inherit href=#11>11</a>
+</span><span class=lnt id=12><a style=outline:none;text-decoration:none;color:inherit href=#12>12</a>
+</span><span class=lnt id=13><a style=outline:none;text-decoration:none;color:inherit href=#13>13</a>
+</span><span class=lnt id=14><a style=outline:none;text-decoration:none;color:inherit href=#14>14</a>
+</span><span class=lnt id=15><a style=outline:none;text-decoration:none;color:inherit href=#15>15</a>
+</span><span class=lnt id=16><a style=outline:none;text-decoration:none;color:inherit href=#16>16</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=kn>from</span> <span class=nn>abc</span> <span class=kn>import</span> <span class=n>ABC</span>
+
+<span class=k>class</span> <span class=nc>Constraint</span><span class=p>(</span><span class=n>ABC</span><span class=p>):</span>
+    <span class=s2>&#34;&#34;&#34;Used to restrict that value of a ```ConstrainedValue```.&#34;&#34;&#34;</span>
+    <span class=k>pass</span>
+
+<span class=k>class</span> <span class=nc>FixedValueConstraint</span><span class=p>(</span><span class=n>Constraint</span><span class=p>):</span>
+    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>value</span><span class=p>):</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_value</span> <span class=o>=</span> <span class=n>value</span>
+
+    <span class=k>def</span> <span class=nf>check</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>t</span><span class=p>):</span>
+        <span class=k>return</span> <span class=n>t</span> <span class=o>==</span> <span class=bp>self</span><span class=o>.</span><span class=n>_value</span>
+
+    <span class=nd>@property</span>
+    <span class=k>def</span> <span class=nf>value</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>_value</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>This really looks like we&rsquo;re getting somewhere. We have a class which represents a constrainable value, and we can apply constraints to it.</p>
+<p>So how might we integrate this with a shape? Let&rsquo;s take the simplest of shapes, a point, and see what we might do. A naive implementation of a <code>Point</code> with no <code>ConstrainedValue</code> integration might be:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2> 2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3> 3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4> 4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7> 7</a>
+</span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8> 8</a>
+</span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9> 9</a>
+</span><span class=lnt id=10><a style=outline:none;text-decoration:none;color:inherit href=#10>10</a>
+</span><span class=lnt id=11><a style=outline:none;text-decoration:none;color:inherit href=#11>11</a>
+</span><span class=lnt id=12><a style=outline:none;text-decoration:none;color:inherit href=#12>12</a>
+</span><span class=lnt id=13><a style=outline:none;text-decoration:none;color:inherit href=#13>13</a>
+</span><span class=lnt id=14><a style=outline:none;text-decoration:none;color:inherit href=#14>14</a>
+</span><span class=lnt id=15><a style=outline:none;text-decoration:none;color:inherit href=#15>15</a>
+</span><span class=lnt id=16><a style=outline:none;text-decoration:none;color:inherit href=#16>16</a>
+</span><span class=lnt id=17><a style=outline:none;text-decoration:none;color:inherit href=#17>17</a>
+</span><span class=lnt id=18><a style=outline:none;text-decoration:none;color:inherit href=#18>18</a>
+</span><span class=lnt id=19><a style=outline:none;text-decoration:none;color:inherit href=#19>19</a>
+</span><span class=lnt id=20><a style=outline:none;text-decoration:none;color:inherit href=#20>20</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>Point</span><span class=p>:</span>
+    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=n>x</span><span class=o>=</span><span class=kc>None</span><span class=p>,</span> <span class=n>y</span><span class=o>=</span><span class=kc>None</span><span class=p>):</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_x</span> <span class=o>=</span> <span class=n>x</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_y</span> <span class=o>=</span> <span class=n>y</span>
+
+    <span class=nd>@property</span>
+    <span class=k>def</span> <span class=nf>x</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>_x</span>
+
+    <span class=nd>@x</span><span class=o>.</span><span class=n>setter</span>
+    <span class=k>def</span> <span class=nf>x</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>value</span><span class=p>):</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_x</span> <span class=o>=</span> <span class=n>value</span>
+
+    <span class=nd>@property</span>
+    <span class=k>def</span> <span class=nf>y</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>_y</span>
+
+    <span class=nd>@y</span><span class=o>.</span><span class=n>setter</span>
+    <span class=k>def</span> <span class=nf>y</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>value</span><span class=p>):</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_y</span> <span class=o>=</span> <span class=n>value</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>To stitch our <code>ConstrainedValue</code> into this, we need to modify the initializer so that it creates <code>ConstrainedValue</code> objects; alter the properties so that they add a <code>FixedValueConstraint</code> to the <code>ConstrainedValue</code>; and then use those properties to set the values in the initializer if they are provided:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2> 2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3> 3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4> 4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7> 7</a>
+</span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8> 8</a>
+</span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9> 9</a>
+</span><span class=lnt id=10><a style=outline:none;text-decoration:none;color:inherit href=#10>10</a>
+</span><span class=lnt id=11><a style=outline:none;text-decoration:none;color:inherit href=#11>11</a>
+</span><span class=lnt id=12><a style=outline:none;text-decoration:none;color:inherit href=#12>12</a>
+</span><span class=lnt id=13><a style=outline:none;text-decoration:none;color:inherit href=#13>13</a>
+</span><span class=lnt id=14><a style=outline:none;text-decoration:none;color:inherit href=#14>14</a>
+</span><span class=lnt id=15><a style=outline:none;text-decoration:none;color:inherit href=#15>15</a>
+</span><span class=lnt id=16><a style=outline:none;text-decoration:none;color:inherit href=#16>16</a>
+</span><span class=lnt id=17><a style=outline:none;text-decoration:none;color:inherit href=#17>17</a>
+</span><span class=lnt id=18><a style=outline:none;text-decoration:none;color:inherit href=#18>18</a>
+</span><span class=lnt id=19><a style=outline:none;text-decoration:none;color:inherit href=#19>19</a>
+</span><span class=lnt id=20><a style=outline:none;text-decoration:none;color:inherit href=#20>20</a>
+</span><span class=lnt id=21><a style=outline:none;text-decoration:none;color:inherit href=#21>21</a>
+</span><span class=lnt id=22><a style=outline:none;text-decoration:none;color:inherit href=#22>22</a>
+</span><span class=lnt id=23><a style=outline:none;text-decoration:none;color:inherit href=#23>23</a>
+</span><span class=lnt id=24><a style=outline:none;text-decoration:none;color:inherit href=#24>24</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>Point</span><span class=p>:</span>
+    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>x</span><span class=o>=</span><span class=kc>None</span><span class=p>,</span> <span class=n>y</span><span class=o>=</span><span class=kc>None</span><span class=p>):</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_x</span> <span class=o>=</span> <span class=n>ConstrainedValue</span><span class=p>()</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_y</span> <span class=o>=</span> <span class=n>ConstrainedValue</span><span class=p>()</span>
+        <span class=k>if</span> <span class=n>x</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span> 
+            <span class=bp>self</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=n>x</span>
+        <span class=k>if</span> <span class=n>y</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span> <span class=p>:</span> 
+            <span class=bp>self</span><span class=o>.</span><span class=n>y</span> <span class=o>=</span> <span class=n>y</span>
+
+    <span class=nd>@property</span>
+    <span class=k>def</span> <span class=nf>x</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>_x</span>
+
+    <span class=nd>@x</span><span class=o>.</span><span class=n>setter</span>
+    <span class=k>def</span> <span class=nf>x</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>value</span><span class=p>):</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_x</span><span class=o>.</span><span class=n>constrain_with</span><span class=p>(</span><span class=n>FixedValueConstraint</span><span class=p>(</span><span class=n>value</span><span class=p>))</span>    
+
+    <span class=nd>@property</span>
+    <span class=k>def</span> <span class=nf>y</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>_y</span>
+
+    <span class=nd>@y</span><span class=o>.</span><span class=n>setter</span>
+    <span class=k>def</span> <span class=nf>y</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>value</span><span class=p>):</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_y</span><span class=o>.</span><span class=n>constrain_with</span><span class=p>(</span><span class=n>FixedValueConstraint</span><span class=p>(</span><span class=n>value</span><span class=p>))</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>So now we can create a <code>Point</code>, assign it some co-ordinates, and have it return a <code>ConstrainedValue</code> for each of those properties:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2>2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3>3</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>p</span> <span class=o>=</span> <span class=n>Point</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=mi>2</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=nb>type</span><span class=p>(</span><span class=n>p</span><span class=o>.</span><span class=n>x</span><span class=p>)</span><span class=o>.</span><span class=vm>__name__</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=nb>type</span><span class=p>(</span><span class=n>p</span><span class=o>.</span><span class=n>y</span><span class=p>)</span><span class=o>.</span><span class=vm>__name__</span><span class=p>)</span>
+</code></pre></td></tr></table>
+</div>
+</div><pre tabindex=0><code>ConstrainedValue
+ConstrainedValue
+</code></pre><h2 id=getting-value-back>Getting Value Back</h2>
+<p>Right now this constrained value isn&rsquo;t a lot of use as there&rsquo;s no way of finding out what the value is. The details of how we do this in general are for a later article, but let&rsquo;s implement a trivial resolve method in <code>ConstrainedValue</code> which simply checks if its constrained with a <code>FixedValueConstraint</code> and if so returns that value, otherwise throws an <code>UnderConstrainedError</code>. This will allow us to play a little more and really check that what we&rsquo;ve built so far will work for us:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2> 2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3> 3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4> 4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7> 7</a>
+</span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8> 8</a>
+</span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9> 9</a>
+</span><span class=lnt id=10><a style=outline:none;text-decoration:none;color:inherit href=#10>10</a>
+</span><span class=lnt id=11><a style=outline:none;text-decoration:none;color:inherit href=#11>11</a>
+</span><span class=lnt id=12><a style=outline:none;text-decoration:none;color:inherit href=#12>12</a>
+</span><span class=lnt id=13><a style=outline:none;text-decoration:none;color:inherit href=#13>13</a>
+</span><span class=lnt id=14><a style=outline:none;text-decoration:none;color:inherit href=#14>14</a>
+</span><span class=lnt id=15><a style=outline:none;text-decoration:none;color:inherit href=#15>15</a>
+</span><span class=lnt id=16><a style=outline:none;text-decoration:none;color:inherit href=#16>16</a>
+</span><span class=lnt id=17><a style=outline:none;text-decoration:none;color:inherit href=#17>17</a>
+</span><span class=lnt id=18><a style=outline:none;text-decoration:none;color:inherit href=#18>18</a>
+</span><span class=lnt id=19><a style=outline:none;text-decoration:none;color:inherit href=#19>19</a>
+</span><span class=lnt id=20><a style=outline:none;text-decoration:none;color:inherit href=#20>20</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>UnderConstrainedError</span><span class=p>(</span><span class=ne>RuntimeError</span><span class=p>):</span>
+    <span class=k>pass</span>
+
+<span class=k>class</span> <span class=nc>ConstrainedValue</span><span class=p>():</span>
+    <span class=s2>&#34;&#34;&#34;An object which can be passed around to represent a value.&#34;&#34;&#34;</span>
+
+    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=p>:</span> <span class=n>List</span><span class=p>[</span><span class=n>Constraint</span><span class=p>]</span> <span class=o>=</span> <span class=p>[]</span>
+
+    <span class=k>def</span> <span class=nf>constrain_with</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>constraint</span><span class=p>):</span>
+        <span class=s2>&#34;&#34;&#34;Add a constraint to this objects list of constraints.&#34;&#34;&#34;</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>constraint</span><span class=p>)</span>
+
+    <span class=k>def</span> <span class=nf>resolve</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=s2>&#34;&#34;&#34;Naive implementation to aid testing&#34;&#34;&#34;</span>
+        <span class=k>for</span> <span class=n>constraint</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=p>:</span>
+            <span class=k>if</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>constraint</span><span class=p>,</span> <span class=n>FixedValueConstraint</span><span class=p>):</span>
+                <span class=k>return</span> <span class=n>constraint</span><span class=o>.</span><span class=n>value</span>
+
+            <span class=k>raise</span> <span class=n>UnderconstrainedError</span><span class=p>(</span><span class=s2>&#34;Fixed Value has not been provided.&#34;</span><span class=p>)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>So now we should be able to ask our <code>Point</code> what the values are of its properties:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2>2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3>3</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>p</span> <span class=o>=</span> <span class=n>Point</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=mi>2</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;p.x is </span><span class=si>{</span><span class=n>p</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;p.y is </span><span class=si>{</span><span class=n>p</span><span class=o>.</span><span class=n>y</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>Which gives us the output we&rsquo;d expect:</p>
+<pre tabindex=0><code>p.x is 1
+p.y is 2
+</code></pre><p>This is all well and good. We can create a point and give it values, but as it stands we cannot constrain one point to &ldquo;point to&rdquo; another. If create a <code>Point</code> <code>p</code> with some initial values, and then another point <code>q</code> and then set the <code>x</code> value of <code>q</code> to the <code>x</code> value of <code>p</code>, then ask <code>q.x</code> what its value is:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2>2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3>3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4>4</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>p</span> <span class=o>=</span> <span class=n>Point</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=mi>2</span><span class=p>)</span>
+<span class=n>q</span> <span class=o>=</span> <span class=n>Point</span><span class=p>()</span>
+<span class=n>q</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=n>p</span><span class=o>.</span><span class=n>x</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;q.x is </span><span class=si>{</span><span class=n>q</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>then we get a reference to the <code>ConstrainedValue</code> which is <code>p.x</code> instead of <code>1</code> as we&rsquo;d probably expect.</p>
+<pre tabindex=0><code>q.x is &lt;test_pysketcher_memoization.test_code_150.&lt;locals&gt;.ConstrainedValue object at 0x106375460&gt;
+</code></pre><p>We can call <code>resolve</code> twice to get the value we want:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2>2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3>3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4>4</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>p</span> <span class=o>=</span> <span class=n>Point</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=mi>2</span><span class=p>)</span>
+<span class=n>q</span> <span class=o>=</span> <span class=n>Point</span><span class=p>()</span>
+<span class=n>q</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=n>p</span><span class=o>.</span><span class=n>x</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;q.x is </span><span class=si>{</span><span class=n>q</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+</code></pre></td></tr></table>
+</div>
+</div><pre tabindex=0><code>q.x is 1
+</code></pre><p>but that is very messy and in complex diagrams we may have to call resolve many times. We could
+alter our resolve method to detect if it is about to return a <code>ConstrainedValue</code> and if it is, call <code>resolve()</code> again until such time as it gets to a defined value. I feel its neater, however, to detect if we&rsquo;re <em>assigning</em> a <code>ConstrainedValue</code>. If we are, then instead of adding a <code>FixedValueConstraint</code> we simply set the property to the provided <code>ConstrainedValue</code>.</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2> 2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3> 3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4> 4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7> 7</a>
+</span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8> 8</a>
+</span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9> 9</a>
+</span><span class=lnt id=10><a style=outline:none;text-decoration:none;color:inherit href=#10>10</a>
+</span><span class=lnt id=11><a style=outline:none;text-decoration:none;color:inherit href=#11>11</a>
+</span><span class=lnt id=12><a style=outline:none;text-decoration:none;color:inherit href=#12>12</a>
+</span><span class=lnt id=13><a style=outline:none;text-decoration:none;color:inherit href=#13>13</a>
+</span><span class=lnt id=14><a style=outline:none;text-decoration:none;color:inherit href=#14>14</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>Point</span><span class=p>:</span>
+<span class=c1>#... </span>
+    <span class=nd>@x</span><span class=o>.</span><span class=n>setter</span>
+    <span class=k>def</span> <span class=nf>x</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>value</span><span class=p>):</span>
+        <span class=k>if</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>value</span><span class=p>,</span> <span class=n>ConstrainedValue</span><span class=p>):</span>
+            <span class=bp>self</span><span class=o>.</span><span class=n>_x</span> <span class=o>=</span> <span class=n>value</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_x</span><span class=o>.</span><span class=n>constrain_with</span><span class=p>(</span><span class=n>FixedValueConstraint</span><span class=p>(</span><span class=n>value</span><span class=p>))</span>    
+
+<span class=c1>#... </span>
+    <span class=nd>@y</span><span class=o>.</span><span class=n>setter</span>
+    <span class=k>def</span> <span class=nf>y</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>value</span><span class=p>):</span>
+        <span class=k>if</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>value</span><span class=p>,</span> <span class=n>ConstrainedValue</span><span class=p>):</span>
+            <span class=bp>self</span><span class=o>.</span><span class=n>_y</span> <span class=o>=</span> <span class=n>value</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_y</span><span class=o>.</span><span class=n>constrain_with</span><span class=p>(</span><span class=n>FixedValueConstraint</span><span class=p>(</span><span class=n>value</span><span class=p>))</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>This now gives us more intuitive behavior:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2>2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3>3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4>4</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>p</span> <span class=o>=</span> <span class=n>Point</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=mi>2</span><span class=p>)</span>
+<span class=n>q</span> <span class=o>=</span> <span class=n>Point</span><span class=p>()</span>
+<span class=n>q</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=n>p</span><span class=o>.</span><span class=n>x</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;q.x is </span><span class=si>{</span><span class=n>q</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+</code></pre></td></tr></table>
+</div>
+</div><pre tabindex=0><code>q.x is 1
+</code></pre><p>Great!</p>
+<h2 id=lets-get-the-descriptors-in>Let&rsquo;s get the descriptors in</h2>
+<p>All is not well and good, however. If we look at our <code>Point</code> class we have a code which is repeated for the <code>x</code> and <code>y</code> properties. Moreover this code will need to be repeated for all the properties on all of our shapes, which is far from ideal. It would be much better if we could somehow encapsulate the assignment logic into the <code>ConstrainedValue</code> itself and have that behavior shared across all such objects in PySketcher.</p>
+<p>It so happens that there is a way to do this. Python provides a mechanism called a <code>Descriptor</code> which calls a method when a field is set or read. It is a <code>protocol</code> which means that we don&rsquo;t have to explicitly declare that we are creating a <code>Descriptor</code>, we just have to comply with its requirements. In this case defining a <code>__set__</code>, <code>__get__</code>, or <code>__delete__</code> method is sufficient.</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2> 2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3> 3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4> 4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7> 7</a>
+</span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8> 8</a>
+</span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9> 9</a>
+</span><span class=lnt id=10><a style=outline:none;text-decoration:none;color:inherit href=#10>10</a>
+</span><span class=lnt id=11><a style=outline:none;text-decoration:none;color:inherit href=#11>11</a>
+</span><span class=lnt id=12><a style=outline:none;text-decoration:none;color:inherit href=#12>12</a>
+</span><span class=lnt id=13><a style=outline:none;text-decoration:none;color:inherit href=#13>13</a>
+</span><span class=lnt id=14><a style=outline:none;text-decoration:none;color:inherit href=#14>14</a>
+</span><span class=lnt id=15><a style=outline:none;text-decoration:none;color:inherit href=#15>15</a>
+</span><span class=lnt id=16><a style=outline:none;text-decoration:none;color:inherit href=#16>16</a>
+</span><span class=lnt id=17><a style=outline:none;text-decoration:none;color:inherit href=#17>17</a>
+</span><span class=lnt id=18><a style=outline:none;text-decoration:none;color:inherit href=#18>18</a>
+</span><span class=lnt id=19><a style=outline:none;text-decoration:none;color:inherit href=#19>19</a>
+</span><span class=lnt id=20><a style=outline:none;text-decoration:none;color:inherit href=#20>20</a>
+</span><span class=lnt id=21><a style=outline:none;text-decoration:none;color:inherit href=#21>21</a>
+</span><span class=lnt id=22><a style=outline:none;text-decoration:none;color:inherit href=#22>22</a>
+</span><span class=lnt id=23><a style=outline:none;text-decoration:none;color:inherit href=#23>23</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>ExampleDescriptor</span><span class=p>:</span>
+    <span class=k>def</span> <span class=nf>__init</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_value</span> <span class=o>=</span> <span class=kc>None</span>
+
+    <span class=k>def</span> <span class=fm>__get__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>instance</span><span class=p>,</span> <span class=nb>type</span><span class=o>=</span><span class=kc>None</span><span class=p>):</span>
+        <span class=nb>print</span><span class=p>(</span><span class=s2>&#34;I am a get method&#34;</span><span class=p>)</span>
+        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>_value</span>
+
+    <span class=k>def</span> <span class=fm>__set__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>instance</span><span class=p>,</span> <span class=n>value</span><span class=p>):</span>
+        <span class=nb>print</span><span class=p>(</span><span class=s2>&#34;I am a set method&#34;</span><span class=p>)</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_value</span> <span class=o>=</span> <span class=n>value</span>
+
+<span class=k>class</span> <span class=nc>ExampleObject</span><span class=p>:</span>
+    <span class=n>prop</span> <span class=o>=</span> <span class=n>ExampleDescriptor</span><span class=p>()</span>
+
+
+<span class=n>test</span> <span class=o>=</span> <span class=n>ExampleObject</span><span class=p>()</span>
+<span class=nb>print</span><span class=p>(</span><span class=s2>&#34;##&#34;</span><span class=p>)</span>
+<span class=n>test</span><span class=o>.</span><span class=n>prop</span> <span class=o>=</span> <span class=mi>1</span>
+<span class=nb>print</span><span class=p>(</span><span class=s2>&#34;##&#34;</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=n>test</span><span class=o>.</span><span class=n>prop</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=s2>&#34;##&#34;</span><span class=p>)</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><pre tabindex=0><code>##
+I am a set method
+##
+I am a get method
+1
+##
+</code></pre><p>So by augmenting out <code>ConstrainedValue</code> class with a <code>__get__</code> and <code>__set__</code> method, we can move the assignment logic out of the properties in the <code>Point</code> class, and in fact do away with the properties all together.</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2> 2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3> 3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4> 4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7> 7</a>
+</span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8> 8</a>
+</span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9> 9</a>
+</span><span class=lnt id=10><a style=outline:none;text-decoration:none;color:inherit href=#10>10</a>
+</span><span class=lnt id=11><a style=outline:none;text-decoration:none;color:inherit href=#11>11</a>
+</span><span class=lnt id=12><a style=outline:none;text-decoration:none;color:inherit href=#12>12</a>
+</span><span class=lnt id=13><a style=outline:none;text-decoration:none;color:inherit href=#13>13</a>
+</span><span class=lnt id=14><a style=outline:none;text-decoration:none;color:inherit href=#14>14</a>
+</span><span class=lnt id=15><a style=outline:none;text-decoration:none;color:inherit href=#15>15</a>
+</span><span class=lnt id=16><a style=outline:none;text-decoration:none;color:inherit href=#16>16</a>
+</span><span class=lnt id=17><a style=outline:none;text-decoration:none;color:inherit href=#17>17</a>
+</span><span class=lnt id=18><a style=outline:none;text-decoration:none;color:inherit href=#18>18</a>
+</span><span class=lnt id=19><a style=outline:none;text-decoration:none;color:inherit href=#19>19</a>
+</span><span class=lnt id=20><a style=outline:none;text-decoration:none;color:inherit href=#20>20</a>
+</span><span class=lnt id=21><a style=outline:none;text-decoration:none;color:inherit href=#21>21</a>
+</span><span class=lnt id=22><a style=outline:none;text-decoration:none;color:inherit href=#22>22</a>
+</span><span class=lnt id=23><a style=outline:none;text-decoration:none;color:inherit href=#23>23</a>
+</span><span class=lnt id=24><a style=outline:none;text-decoration:none;color:inherit href=#24>24</a>
+</span><span class=lnt id=25><a style=outline:none;text-decoration:none;color:inherit href=#25>25</a>
+</span><span class=lnt id=26><a style=outline:none;text-decoration:none;color:inherit href=#26>26</a>
+</span><span class=lnt id=27><a style=outline:none;text-decoration:none;color:inherit href=#27>27</a>
+</span><span class=lnt id=28><a style=outline:none;text-decoration:none;color:inherit href=#28>28</a>
+</span><span class=lnt id=29><a style=outline:none;text-decoration:none;color:inherit href=#29>29</a>
+</span><span class=lnt id=30><a style=outline:none;text-decoration:none;color:inherit href=#30>30</a>
+</span><span class=lnt id=31><a style=outline:none;text-decoration:none;color:inherit href=#31>31</a>
+</span><span class=lnt id=32><a style=outline:none;text-decoration:none;color:inherit href=#32>32</a>
+</span><span class=lnt id=33><a style=outline:none;text-decoration:none;color:inherit href=#33>33</a>
+</span><span class=lnt id=34><a style=outline:none;text-decoration:none;color:inherit href=#34>34</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>ConstrainedValue</span><span class=p>():</span>
+    <span class=s2>&#34;&#34;&#34;An object which can be passed around to represent a value.&#34;&#34;&#34;</span>
+<span class=c1>#... </span>
+    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_value</span> <span class=o>=</span> <span class=kc>None</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=p>:</span> <span class=n>List</span><span class=p>[</span><span class=n>Constraint</span><span class=p>]</span> <span class=o>=</span> <span class=p>[]</span>
+
+    <span class=k>def</span> <span class=fm>__get__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>instance</span><span class=p>,</span> <span class=nb>type</span><span class=o>=</span><span class=kc>None</span><span class=p>):</span>
+        <span class=k>return</span> <span class=bp>self</span>
+
+    <span class=k>def</span> <span class=fm>__set__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>instance</span><span class=p>,</span> <span class=n>value</span><span class=p>):</span>
+        <span class=k>if</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>value</span><span class=p>,</span> <span class=nb>type</span><span class=p>(</span><span class=bp>self</span><span class=p>)):</span>
+            <span class=bp>self</span><span class=o>.</span><span class=n>_value</span> <span class=o>=</span> <span class=n>value</span>
+            <span class=k>return</span>
+        
+        <span class=bp>self</span><span class=o>.</span><span class=n>reset_constraints</span><span class=p>()</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>constrain_with</span><span class=p>(</span><span class=n>FixedValueConstraint</span><span class=p>(</span><span class=n>value</span><span class=p>))</span>
+
+
+<span class=k>class</span> <span class=nc>Point</span><span class=p>:</span>
+    <span class=n>x</span> <span class=o>=</span> <span class=n>ConstrainedValue</span><span class=p>()</span>
+    <span class=n>y</span> <span class=o>=</span> <span class=n>ConstrainedValue</span><span class=p>()</span>
+
+    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>x</span><span class=o>=</span><span class=kc>None</span><span class=p>,</span> <span class=n>y</span><span class=o>=</span><span class=kc>None</span><span class=p>):</span>
+        <span class=k>if</span> <span class=n>x</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span> 
+            <span class=bp>self</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=n>x</span>
+        <span class=k>if</span> <span class=n>y</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span> <span class=p>:</span> 
+            <span class=bp>self</span><span class=o>.</span><span class=n>y</span> <span class=o>=</span> <span class=n>y</span>
+
+<span class=n>p</span> <span class=o>=</span> <span class=n>Point</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=mi>2</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;p.x is </span><span class=si>{</span><span class=n>p</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+<span class=n>q</span> <span class=o>=</span> <span class=n>Point</span><span class=p>()</span>
+<span class=n>q</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=n>p</span><span class=o>.</span><span class=n>x</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;q.x is </span><span class=si>{</span><span class=n>q</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+</code></pre></td></tr></table>
+</div>
+</div><pre tabindex=0><code>p.x is 1
+q.x is 1
+</code></pre><p>Now this is starting to look great! The <code>Point</code> class has a really clean definition and the interface for PySketcher users is intuitive. As is so often the way, all is not as rosy as things might at first appear. Let us investigate using <code>p</code> and <code>q</code> as independent points.</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2>2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3>3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4>4</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>p</span> <span class=o>=</span> <span class=n>Point</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=mi>2</span><span class=p>)</span>
+<span class=n>q</span> <span class=o>=</span> <span class=n>Point</span><span class=p>(</span><span class=mi>2</span><span class=p>,</span><span class=mi>3</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;p.x is </span><span class=si>{</span><span class=n>p</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;q.x is </span><span class=si>{</span><span class=n>q</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+</code></pre></td></tr></table>
+</div>
+</div><pre tabindex=0><code>p.x is 2
+q.x is 2
+</code></pre><p>Disaster! Both <code>p</code> and <code>q</code> have the same value for <code>x</code> even though we want them to have separate values.</p>
+<h2 id=perhaps-a-little-too-constrained>Perhaps a little too constrained</h2>
+<p>This is because the <code>ConstrainedValue</code> belongs to the class <code>Point</code> not to the instances of class <code>Point</code>, and as such is shared by all the instances of <code>Point</code>. Alas it has to be this way because that&rsquo;s how decorators work. If you would like to read more about decorators <a href=https://realpython.com/python-descriptors/>there is an excellent article here!</a>, and that very article discusses our exact problem. To fix it we use the <code>__set_name__</code> magic method which is called on instance creation, and use that to define a field on the instance in which to store our values. This also means we have to separate the data away from assignment logic so that we can store it in the instance, which we shall do in a <code>ConstraintSet</code> object. This is a little neater as the code which assigns the values and deals with the method calls is contained in <code>ConstrainedValue</code> and the code which holds the value and the resolution logic is held in <code>ConstraintSet</code>; so we have better separation of concerns.</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2> 2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3> 3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4> 4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7> 7</a>
+</span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8> 8</a>
+</span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9> 9</a>
+</span><span class=lnt id=10><a style=outline:none;text-decoration:none;color:inherit href=#10>10</a>
+</span><span class=lnt id=11><a style=outline:none;text-decoration:none;color:inherit href=#11>11</a>
+</span><span class=lnt id=12><a style=outline:none;text-decoration:none;color:inherit href=#12>12</a>
+</span><span class=lnt id=13><a style=outline:none;text-decoration:none;color:inherit href=#13>13</a>
+</span><span class=lnt id=14><a style=outline:none;text-decoration:none;color:inherit href=#14>14</a>
+</span><span class=lnt id=15><a style=outline:none;text-decoration:none;color:inherit href=#15>15</a>
+</span><span class=lnt id=16><a style=outline:none;text-decoration:none;color:inherit href=#16>16</a>
+</span><span class=lnt id=17><a style=outline:none;text-decoration:none;color:inherit href=#17>17</a>
+</span><span class=lnt id=18><a style=outline:none;text-decoration:none;color:inherit href=#18>18</a>
+</span><span class=lnt id=19><a style=outline:none;text-decoration:none;color:inherit href=#19>19</a>
+</span><span class=lnt id=20><a style=outline:none;text-decoration:none;color:inherit href=#20>20</a>
+</span><span class=lnt id=21><a style=outline:none;text-decoration:none;color:inherit href=#21>21</a>
+</span><span class=lnt id=22><a style=outline:none;text-decoration:none;color:inherit href=#22>22</a>
+</span><span class=lnt id=23><a style=outline:none;text-decoration:none;color:inherit href=#23>23</a>
+</span><span class=lnt id=24><a style=outline:none;text-decoration:none;color:inherit href=#24>24</a>
+</span><span class=lnt id=25><a style=outline:none;text-decoration:none;color:inherit href=#25>25</a>
+</span><span class=lnt id=26><a style=outline:none;text-decoration:none;color:inherit href=#26>26</a>
+</span><span class=lnt id=27><a style=outline:none;text-decoration:none;color:inherit href=#27>27</a>
+</span><span class=lnt id=28><a style=outline:none;text-decoration:none;color:inherit href=#28>28</a>
+</span><span class=lnt id=29><a style=outline:none;text-decoration:none;color:inherit href=#29>29</a>
+</span><span class=lnt id=30><a style=outline:none;text-decoration:none;color:inherit href=#30>30</a>
+</span><span class=lnt id=31><a style=outline:none;text-decoration:none;color:inherit href=#31>31</a>
+</span><span class=lnt id=32><a style=outline:none;text-decoration:none;color:inherit href=#32>32</a>
+</span><span class=lnt id=33><a style=outline:none;text-decoration:none;color:inherit href=#33>33</a>
+</span><span class=lnt id=34><a style=outline:none;text-decoration:none;color:inherit href=#34>34</a>
+</span><span class=lnt id=35><a style=outline:none;text-decoration:none;color:inherit href=#35>35</a>
+</span><span class=lnt id=36><a style=outline:none;text-decoration:none;color:inherit href=#36>36</a>
+</span><span class=lnt id=37><a style=outline:none;text-decoration:none;color:inherit href=#37>37</a>
+</span><span class=lnt id=38><a style=outline:none;text-decoration:none;color:inherit href=#38>38</a>
+</span><span class=lnt id=39><a style=outline:none;text-decoration:none;color:inherit href=#39>39</a>
+</span><span class=lnt id=40><a style=outline:none;text-decoration:none;color:inherit href=#40>40</a>
+</span><span class=lnt id=41><a style=outline:none;text-decoration:none;color:inherit href=#41>41</a>
+</span><span class=lnt id=42><a style=outline:none;text-decoration:none;color:inherit href=#42>42</a>
+</span><span class=lnt id=43><a style=outline:none;text-decoration:none;color:inherit href=#43>43</a>
+</span><span class=lnt id=44><a style=outline:none;text-decoration:none;color:inherit href=#44>44</a>
+</span><span class=lnt id=45><a style=outline:none;text-decoration:none;color:inherit href=#45>45</a>
+</span><span class=lnt id=46><a style=outline:none;text-decoration:none;color:inherit href=#46>46</a>
+</span><span class=lnt id=47><a style=outline:none;text-decoration:none;color:inherit href=#47>47</a>
+</span><span class=lnt id=48><a style=outline:none;text-decoration:none;color:inherit href=#48>48</a>
+</span><span class=lnt id=49><a style=outline:none;text-decoration:none;color:inherit href=#49>49</a>
+</span><span class=lnt id=50><a style=outline:none;text-decoration:none;color:inherit href=#50>50</a>
+</span><span class=lnt id=51><a style=outline:none;text-decoration:none;color:inherit href=#51>51</a>
+</span><span class=lnt id=52><a style=outline:none;text-decoration:none;color:inherit href=#52>52</a>
+</span><span class=lnt id=53><a style=outline:none;text-decoration:none;color:inherit href=#53>53</a>
+</span><span class=lnt id=54><a style=outline:none;text-decoration:none;color:inherit href=#54>54</a>
+</span><span class=lnt id=55><a style=outline:none;text-decoration:none;color:inherit href=#55>55</a>
+</span><span class=lnt id=56><a style=outline:none;text-decoration:none;color:inherit href=#56>56</a>
+</span><span class=lnt id=57><a style=outline:none;text-decoration:none;color:inherit href=#57>57</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>ConstraintSet</span><span class=p>:</span>
+    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span> <span class=o>=</span> <span class=p>[]</span>
+    
+    <span class=k>def</span> <span class=nf>constrain_with</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>constraint</span><span class=p>):</span>
+        <span class=s2>&#34;&#34;&#34;Add a constraint to this objects list of constraints.&#34;&#34;&#34;</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>constraint</span><span class=p>)</span>
+
+    <span class=k>def</span> <span class=nf>reset_constraints</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=s2>&#34;&#34;&#34;Removes the existing constraints from the constraint set&#34;&#34;&#34;</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span> <span class=o>=</span> <span class=p>[]</span>
+
+    <span class=k>def</span> <span class=nf>resolve</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=s2>&#34;&#34;&#34;Naive implementation to aid testing&#34;&#34;&#34;</span>
+        <span class=k>for</span> <span class=n>constraint</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=p>:</span>
+            <span class=k>if</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>constraint</span><span class=p>,</span> <span class=n>FixedValueConstraint</span><span class=p>):</span>
+                <span class=k>return</span> <span class=n>constraint</span><span class=o>.</span><span class=n>value</span>
+
+        <span class=k>raise</span> <span class=n>UnderconstrainedError</span><span class=p>(</span><span class=s2>&#34;Fixed Value has not been provided.&#34;</span><span class=p>)</span>
+
+<span class=k>class</span> <span class=nc>ConstrainedValue</span><span class=p>:</span>
+    <span class=s2>&#34;&#34;&#34;An object which can be passed around to represent a value.&#34;&#34;&#34;</span>
+
+    <span class=k>def</span> <span class=nf>__set_name__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>owner</span><span class=p>,</span> <span class=n>name</span><span class=p>):</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>public_name</span> <span class=o>=</span> <span class=n>name</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>private_name</span> <span class=o>=</span> <span class=sa>f</span><span class=s2>&#34;_</span><span class=si>{</span><span class=n>name</span><span class=si>}</span><span class=s2>&#34;</span>
+
+    <span class=k>def</span> <span class=fm>__get__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>instance</span><span class=p>,</span> <span class=n>typ</span><span class=o>=</span><span class=kc>None</span><span class=p>):</span>
+        <span class=c1># grab the ConstraintSet from the instance</span>
+        <span class=n>constraint_set</span> <span class=o>=</span> <span class=nb>getattr</span><span class=p>(</span><span class=n>instance</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>private_name</span><span class=p>,</span> <span class=kc>None</span><span class=p>)</span>
+        
+        <span class=c1># If the instance didn&#39;t have an initialized ConstraintSet then</span>
+        <span class=c1># give it one</span>
+        <span class=k>if</span> <span class=n>constraint_set</span> <span class=ow>is</span> <span class=kc>None</span><span class=p>:</span>
+            <span class=n>constraint_set</span> <span class=o>=</span> <span class=n>ConstraintSet</span><span class=p>()</span>
+            <span class=nb>setattr</span><span class=p>(</span><span class=n>instance</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>private_name</span><span class=p>,</span> <span class=n>constraint_set</span><span class=p>)</span>
+        <span class=k>return</span> <span class=n>constraint_set</span>
+
+    <span class=k>def</span> <span class=fm>__set__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>instance</span><span class=p>,</span> <span class=n>value</span><span class=p>):</span>
+        <span class=k>if</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>value</span><span class=p>,</span> <span class=n>ConstraintSet</span><span class=p>):</span>
+            <span class=nb>setattr</span><span class=p>(</span><span class=n>instance</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>private_name</span><span class=p>,</span> <span class=n>value</span><span class=p>)</span>
+            <span class=k>return</span>
+
+        <span class=n>constraint_set</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=fm>__get__</span><span class=p>(</span><span class=n>instance</span><span class=p>)</span>
+        <span class=n>constraint_set</span><span class=o>.</span><span class=n>reset_constraints</span><span class=p>()</span>
+        <span class=n>constraint_set</span><span class=o>.</span><span class=n>constrain_with</span><span class=p>(</span><span class=n>FixedValueConstraint</span><span class=p>(</span><span class=n>value</span><span class=p>))</span>
+
+<span class=k>class</span> <span class=nc>Point</span><span class=p>:</span>
+    <span class=n>x</span> <span class=o>=</span> <span class=n>ConstrainedValue</span><span class=p>()</span>
+    <span class=n>y</span> <span class=o>=</span> <span class=n>ConstrainedValue</span><span class=p>()</span>
+
+    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>x</span><span class=o>=</span><span class=kc>None</span><span class=p>,</span> <span class=n>y</span><span class=o>=</span><span class=kc>None</span><span class=p>):</span>
+        <span class=k>if</span> <span class=n>x</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span> 
+            <span class=bp>self</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=n>x</span>
+        <span class=k>if</span> <span class=n>y</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span> <span class=p>:</span> 
+            <span class=bp>self</span><span class=o>.</span><span class=n>y</span> <span class=o>=</span> <span class=n>y</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><p>And this now works:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2>2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3>3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4>4</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>p</span> <span class=o>=</span> <span class=n>Point</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=mi>2</span><span class=p>)</span>
+<span class=n>q</span> <span class=o>=</span> <span class=n>Point</span><span class=p>(</span><span class=mi>2</span><span class=p>,</span><span class=mi>3</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;p.x is </span><span class=si>{</span><span class=n>p</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;q.x is </span><span class=si>{</span><span class=n>q</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+</code></pre></td></tr></table>
+</div>
+</div><pre tabindex=0><code>p.x is 1
+q.x is 2
+</code></pre><p>As does our original logic:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2>2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3>3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4>4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5>5</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>p</span> <span class=o>=</span> <span class=n>Point</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=mi>2</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;p.x is </span><span class=si>{</span><span class=n>p</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+<span class=n>q</span> <span class=o>=</span> <span class=n>Point</span><span class=p>()</span>
+<span class=n>q</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=n>p</span><span class=o>.</span><span class=n>x</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;q.x is </span><span class=si>{</span><span class=n>q</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+</code></pre></td></tr></table>
+</div>
+</div><pre tabindex=0><code>p.x is 1
+q.x is 1
+</code></pre><p>And for the icing on the cake, let&rsquo;s validate that when we change the value of <code>p.x</code>, the value of <code>q.x</code> changes with it:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2>2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3>3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4>4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5>5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6>6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7>7</a>
+</span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8>8</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>p</span> <span class=o>=</span> <span class=n>Point</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=mi>2</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;p.x is </span><span class=si>{</span><span class=n>p</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+<span class=n>q</span> <span class=o>=</span> <span class=n>Point</span><span class=p>()</span>
+<span class=n>q</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=n>p</span><span class=o>.</span><span class=n>x</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;q.x is </span><span class=si>{</span><span class=n>q</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+<span class=n>p</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=mi>2</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;p.x is </span><span class=si>{</span><span class=n>p</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;q.x is </span><span class=si>{</span><span class=n>q</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+</code></pre></td></tr></table>
+</div>
+</div><pre tabindex=0><code>p.x is 1
+q.x is 1
+p.x is 2
+q.x is 2
+</code></pre><h2 id=making-things-more-explicit>Making things more explicit</h2>
+<p>As a little recap, let&rsquo;s review what we&rsquo;ve achieved so far. We can create an object which has fields which can have constraints applied to them by creating them as <code>ConstrainedValues</code> at the class level. This results in a set of constraints being stored in a <code>ConstraintSet</code> object at the instance level, and constraints can be added using the <code>constrain_with</code> method. Our fields can either be assigned a value or another <code>ConstraintSet</code>. Value assignment is implemented by, behind the scenes, applying a <code>FixedValueConstraint</code> to the field in question having cleared any previously applied constraints. We have validated this by implementing a <code>Point</code> object with two fields <code>x</code> and <code>y</code>. instantiating this twice, linking the <code>x</code> field of one instance to the other, and validating that when the first is changed, the second changes with it.</p>
+<p>Certainly great progress! What might happen if we wanted to reverse engineer this process, however? If we wanted to ask say, <code>q.x</code>, what it is constrained by? At the moment, if we executed <code>print(q.x)</code> it would show the same object as <code>p.x</code>, namely a <code>FixedValueConstraint</code>. Moreover seeing that <code>q.x</code> has been constrained by a <code>FixedValueConstraint</code> may lead a developer to think that a value had been directly assigned to <code>q.x</code> which is not the case. This may be confusing if we&rsquo;re trying to debug a complex diagram. As such let&rsquo;s create an additional constraint, a <code>LinkedValueConstraint</code>, which means we can explicitly model that <code>q.x</code> has been assigned <code>p.x</code>.</p>
+<p>Before we do that let&rsquo;s sort out how <code>ConstraintSets</code> are displayed. Right now, if we print one directly, we are given a type and a memory location. Let&rsquo;s override the <code>__repr__</code> method to give us something a little more meaningful. We&rsquo;ll need to do something similar to <code>FixedValueConstraint</code> as well:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2> 2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3> 3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4> 4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7> 7</a>
+</span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8> 8</a>
+</span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9> 9</a>
+</span><span class=lnt id=10><a style=outline:none;text-decoration:none;color:inherit href=#10>10</a>
+</span><span class=lnt id=11><a style=outline:none;text-decoration:none;color:inherit href=#11>11</a>
+</span><span class=lnt id=12><a style=outline:none;text-decoration:none;color:inherit href=#12>12</a>
+</span><span class=lnt id=13><a style=outline:none;text-decoration:none;color:inherit href=#13>13</a>
+</span><span class=lnt id=14><a style=outline:none;text-decoration:none;color:inherit href=#14>14</a>
+</span><span class=lnt id=15><a style=outline:none;text-decoration:none;color:inherit href=#15>15</a>
+</span><span class=lnt id=16><a style=outline:none;text-decoration:none;color:inherit href=#16>16</a>
+</span><span class=lnt id=17><a style=outline:none;text-decoration:none;color:inherit href=#17>17</a>
+</span><span class=lnt id=18><a style=outline:none;text-decoration:none;color:inherit href=#18>18</a>
+</span><span class=lnt id=19><a style=outline:none;text-decoration:none;color:inherit href=#19>19</a>
+</span><span class=lnt id=20><a style=outline:none;text-decoration:none;color:inherit href=#20>20</a>
+</span><span class=lnt id=21><a style=outline:none;text-decoration:none;color:inherit href=#21>21</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>ConstraintSet</span><span class=p>:</span>
+<span class=c1>#... </span>
+    <span class=k>def</span> <span class=fm>__repr__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=n>retval</span> <span class=o>=</span> <span class=s2>&#34;ConstraintSet(&#34;</span>
+        <span class=k>if</span> <span class=nb>len</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=p>)</span> <span class=o>==</span> <span class=mi>0</span><span class=p>:</span>
+            <span class=n>retval</span> <span class=o>+=</span> <span class=s2>&#34;)&#34;</span>
+            <span class=k>return</span> <span class=n>retval</span>
+
+        <span class=k>for</span> <span class=n>constraint</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=p>:</span>
+            <span class=n>retval</span> <span class=o>+=</span> <span class=sa>f</span><span class=s2>&#34;</span><span class=se>\n</span><span class=s2>    </span><span class=si>{</span><span class=n>constraint</span><span class=si>}</span><span class=s2>&#34;</span>
+        <span class=n>retval</span> <span class=o>+=</span> <span class=s2>&#34;</span><span class=se>\n</span><span class=s2>)&#34;</span>
+        <span class=k>return</span> <span class=n>retval</span> 
+
+<span class=k>class</span> <span class=nc>FixedValueConstraint</span><span class=p>(</span><span class=n>Constraint</span><span class=p>):</span>
+<span class=c1>#... </span>
+    <span class=k>def</span> <span class=fm>__repr__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=k>return</span> <span class=sa>f</span><span class=s2>&#34;</span><span class=si>{</span><span class=bp>self</span><span class=o>.</span><span class=vm>__class__</span><span class=o>.</span><span class=vm>__name__</span><span class=si>}</span><span class=s2>&lt;</span><span class=si>{</span><span class=bp>self</span><span class=o>.</span><span class=n>value</span><span class=si>}</span><span class=s2>&gt;&#34;</span>
+
+<span class=c1>#... </span>
+<span class=n>p</span> <span class=o>=</span> <span class=n>Point</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=mi>2</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=n>p</span><span class=o>.</span><span class=n>x</span><span class=p>)</span> 
+</code></pre></td></tr></table>
+</div>
+</div><pre tabindex=0><code>ConstraintSet(
+    FixedValueConstraint&lt;1&gt;
+)
+</code></pre><p>Okay, so on to our new constraint. This <code>LinkedValueConstraint</code> will store a link to a <code>ConstraintSet</code>:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2> 2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3> 3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4> 4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7> 7</a>
+</span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8> 8</a>
+</span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9> 9</a>
+</span><span class=lnt id=10><a style=outline:none;text-decoration:none;color:inherit href=#10>10</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>LinkedValueConstraint</span><span class=p>(</span><span class=n>Constraint</span><span class=p>):</span>
+    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>constraint_set</span><span class=p>):</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_constraint_set</span> <span class=o>=</span> <span class=n>constraint_set</span>
+
+    <span class=nd>@property</span>
+    <span class=k>def</span> <span class=nf>constraint_set</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>_constraint_set</span>
+    
+    <span class=k>def</span> <span class=fm>__repr__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=k>return</span> <span class=sa>f</span><span class=s2>&#34;</span><span class=si>{</span><span class=bp>self</span><span class=o>.</span><span class=vm>__class__</span><span class=o>.</span><span class=vm>__name__</span><span class=si>}</span><span class=s2>&lt;</span><span class=si>{</span><span class=bp>self</span><span class=o>.</span><span class=n>constraint_set</span><span class=si>}</span><span class=s2>&gt;&#34;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>A quick test:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2>2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3>3</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>p</span> <span class=o>=</span> <span class=n>Point</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span><span class=mi>2</span><span class=p>)</span>
+<span class=n>c</span> <span class=o>=</span> <span class=n>LinkedValueConstraint</span><span class=p>(</span><span class=n>p</span><span class=o>.</span><span class=n>x</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=n>c</span><span class=p>)</span>
+</code></pre></td></tr></table>
+</div>
+</div><pre tabindex=0><code>LinkedValueConstraint&lt;ConstraintSet(
+    FixedValueConstraint&lt;1&gt;
+)&gt;
+</code></pre><p>So we can see now that our <code>LinkedValueConstraint</code> is linked to a <code>ConstraintSet</code> which contains a single constraint which is a <code>FixedValueConstraint</code> fixed at 1. This is helpful, but it would be even more helpful if we could link back to <code>p.x</code> itself. The output I would like to see is:</p>
+<pre tabindex=0><code>LinkedValueConstraint&lt;p.x&gt;
+</code></pre><p>So let&rsquo;s have a look at what we can do with our <code>ConstraintSet</code> to give it a useful name. The list of all the constraints may well be useful so we&rsquo;ll leave that in <code>__repr__</code> but we can override <code>__str__</code> to use the name as an alternative.</p>
+<p>We create the <code>ConstraintSet</code> in the <code>ConstrainedValue</code> class, and that is aware of the instance to which the <code>ConstraintSet</code> belongs, so at that point we can pass a name in. Let&rsquo;s update the constructor of <code>ConstraintSet</code> to take a name, and add the <code>__str__</code> method:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2>2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3>3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4>4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5>5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6>6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7>7</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>ConstraintSet</span><span class=p>:</span>
+    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>name</span><span class=o>=</span><span class=s2>&#34;&#34;</span><span class=p>):</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span> <span class=o>=</span> <span class=p>[]</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_name</span> <span class=o>=</span> <span class=n>name</span>
+<span class=c1>#... </span>
+    <span class=k>def</span> <span class=fm>__str__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>_name</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>And update <code>ConstrainedValue</code> to provide that name:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2> 2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3> 3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4> 4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7> 7</a>
+</span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8> 8</a>
+</span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9> 9</a>
+</span><span class=lnt id=10><a style=outline:none;text-decoration:none;color:inherit href=#10>10</a>
+</span><span class=lnt id=11><a style=outline:none;text-decoration:none;color:inherit href=#11>11</a>
+</span><span class=lnt id=12><a style=outline:none;text-decoration:none;color:inherit href=#12>12</a>
+</span><span class=lnt id=13><a style=outline:none;text-decoration:none;color:inherit href=#13>13</a>
+</span><span class=lnt id=14><a style=outline:none;text-decoration:none;color:inherit href=#14>14</a>
+</span><span class=lnt id=15><a style=outline:none;text-decoration:none;color:inherit href=#15>15</a>
+</span><span class=lnt id=16><a style=outline:none;text-decoration:none;color:inherit href=#16>16</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>ConstrainedValue</span><span class=p>:</span>
+    <span class=s2>&#34;&#34;&#34;An object which can be passed around to represent a value.&#34;&#34;&#34;</span>
+
+<span class=c1>#... </span>
+    <span class=k>def</span> <span class=fm>__get__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>instance</span><span class=p>,</span> <span class=n>typ</span><span class=o>=</span><span class=kc>None</span><span class=p>):</span>
+        <span class=c1># grab the ConstraintSet from the instance</span>
+        <span class=n>constraint_set</span> <span class=o>=</span> <span class=nb>getattr</span><span class=p>(</span><span class=n>instance</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>private_name</span><span class=p>,</span> <span class=kc>None</span><span class=p>)</span>
+        
+        <span class=c1># If the instance didn&#39;t have an initialized ConstraintSet then</span>
+        <span class=c1># give it one</span>
+        <span class=k>if</span> <span class=n>constraint_set</span> <span class=ow>is</span> <span class=kc>None</span><span class=p>:</span>
+            <span class=n>constraint_set</span> <span class=o>=</span> <span class=n>ConstraintSet</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;</span><span class=si>{</span><span class=n>instance</span><span class=o>.</span><span class=n>name</span><span class=si>}</span><span class=s2>.</span><span class=si>{</span><span class=bp>self</span><span class=o>.</span><span class=n>public_name</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+            <span class=nb>setattr</span><span class=p>(</span><span class=n>instance</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=n>private_name</span><span class=p>,</span> <span class=n>constraint_set</span><span class=p>)</span>
+        <span class=k>return</span> <span class=n>constraint_set</span>
+
+<span class=c1>#... </span>
+</code></pre></td></tr></table>
+</div>
+</div><p>Check that worked:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2>2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3>3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4>4</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>p</span> <span class=o>=</span> <span class=n>Point</span><span class=p>(</span><span class=s1>&#39;p&#39;</span><span class=p>,</span><span class=mi>1</span><span class=p>,</span><span class=mi>2</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=n>p</span><span class=o>.</span><span class=n>x</span><span class=p>)</span>
+<span class=n>c</span> <span class=o>=</span> <span class=n>LinkedValueConstraint</span><span class=p>(</span><span class=n>p</span><span class=o>.</span><span class=n>x</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=n>c</span><span class=p>)</span>
+</code></pre></td></tr></table>
+</div>
+</div><pre tabindex=0><code>p.x
+LinkedValueConstraint&lt;p.x&gt;
+</code></pre><p>Now let&rsquo;s stitch this into our <code>__set__</code> method in the <code>ConstrainedValue</code> class:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2> 2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3> 3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4> 4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7> 7</a>
+</span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8> 8</a>
+</span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9> 9</a>
+</span><span class=lnt id=10><a style=outline:none;text-decoration:none;color:inherit href=#10>10</a>
+</span><span class=lnt id=11><a style=outline:none;text-decoration:none;color:inherit href=#11>11</a>
+</span><span class=lnt id=12><a style=outline:none;text-decoration:none;color:inherit href=#12>12</a>
+</span><span class=lnt id=13><a style=outline:none;text-decoration:none;color:inherit href=#13>13</a>
+</span><span class=lnt id=14><a style=outline:none;text-decoration:none;color:inherit href=#14>14</a>
+</span><span class=lnt id=15><a style=outline:none;text-decoration:none;color:inherit href=#15>15</a>
+</span><span class=lnt id=16><a style=outline:none;text-decoration:none;color:inherit href=#16>16</a>
+</span><span class=lnt id=17><a style=outline:none;text-decoration:none;color:inherit href=#17>17</a>
+</span><span class=lnt id=18><a style=outline:none;text-decoration:none;color:inherit href=#18>18</a>
+</span><span class=lnt id=19><a style=outline:none;text-decoration:none;color:inherit href=#19>19</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>ConstrainedValue</span><span class=p>:</span>
+    <span class=s2>&#34;&#34;&#34;An object which can be passed around to represent a value.&#34;&#34;&#34;</span>
+<span class=c1>#... </span>
+    <span class=k>def</span> <span class=fm>__set__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>instance</span><span class=p>,</span> <span class=n>value</span><span class=p>):</span>
+        <span class=c1># Grab the ConstraintSet from the instance</span>
+        <span class=n>constraint_set</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=fm>__get__</span><span class=p>(</span><span class=n>instance</span><span class=p>,</span> <span class=kc>None</span><span class=p>)</span>
+
+        <span class=n>constraint_set</span><span class=o>.</span><span class=n>reset_constraints</span><span class=p>()</span>
+        <span class=c1># if the value we&#39;ve been asked to assign is a ConstraintSet</span>
+        <span class=c1># then add a LinkedValueConstraint: </span>
+        <span class=k>if</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>value</span><span class=p>,</span> <span class=n>ConstraintSet</span><span class=p>):</span>
+            <span class=n>constraint_set</span><span class=o>.</span><span class=n>constrain_with</span><span class=p>(</span><span class=n>LinkedValueConstraint</span><span class=p>(</span><span class=n>value</span><span class=p>))</span>
+            <span class=k>return</span>
+
+        <span class=c1># otherwise use a FixedValueConstraint to constrain to the provided</span>
+        <span class=c1># value</span>
+        <span class=n>constraint_set</span><span class=o>.</span><span class=n>constrain_with</span><span class=p>(</span><span class=n>FixedValueConstraint</span><span class=p>(</span><span class=n>value</span><span class=p>))</span>
+
+<span class=c1>#... </span>
+</code></pre></td></tr></table>
+</div>
+</div><p>Finally let&rsquo;s tweak our <code>resolve</code> method on the <code>ConstraintSet</code> so that it understands what a <code>LinkedValueConstraint</code> is. Remember this method is only a place holder and the real logic of calculating values we&rsquo;ll deal with in a later article.</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2>2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3>3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4>4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5>5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6>6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7>7</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>ConstraintSet</span><span class=p>:</span>
+    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>name</span><span class=o>=</span><span class=s2>&#34;&#34;</span><span class=p>):</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span> <span class=o>=</span> <span class=p>[]</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_name</span> <span class=o>=</span> <span class=n>name</span>
+<span class=c1>#... </span>
+    <span class=k>def</span> <span class=fm>__str__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>_name</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>And now everything should work end to end:</p>
+<div class=highlight><div class=chroma>
+<table class=lntable><tr><td class=lntd>
+<pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
+</span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2>2</a>
+</span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3>3</a>
+</span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4>4</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5>5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6>6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7>7</a>
+</span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8>8</a>
+</span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9>9</a>
+</span></code></pre></td>
+<td class=lntd>
+<pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>p</span> <span class=o>=</span> <span class=n>Point</span><span class=p>(</span><span class=s1>&#39;p&#39;</span><span class=p>,</span> <span class=mi>1</span><span class=p>,</span><span class=mi>2</span><span class=p>)</span>
+<span class=n>q</span> <span class=o>=</span> <span class=n>Point</span><span class=p>(</span><span class=s1>&#39;q&#39;</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;p.x is </span><span class=si>{</span><span class=n>p</span><span class=o>.</span><span class=n>x</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;p.x resolves to </span><span class=si>{</span><span class=n>p</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+<span class=n>q</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=n>p</span><span class=o>.</span><span class=n>x</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;q.x is </span><span class=si>{</span><span class=nb>repr</span><span class=p>(</span><span class=n>q</span><span class=o>.</span><span class=n>x</span><span class=p>)</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;q.x resolves to </span><span class=si>{</span><span class=n>q</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+<span class=n>p</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=mi>2</span>
+<span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;Now p.x has changed, q.x resolves to </span><span class=si>{</span><span class=n>q</span><span class=o>.</span><span class=n>x</span><span class=o>.</span><span class=n>resolve</span><span class=p>()</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+</code></pre></td></tr></table>
+</div>
+</div><pre tabindex=0><code>p.x is p.x
+p.x resolves to 1
+q.x is ConstraintSet(
+    LinkedValueConstraint&lt;p.x&gt;
+)
+q.x resolves to 1
+Now p.x has changed, q.x resolves to 2
+</code></pre><p>Are we done? Not just yet. We can constrain a property to another property, which is helpful, but there are scenarios where we&rsquo;ll need to do more than that. We may, for example, wish to constrain a <code>Point</code> to being on a line, or on the circumference of a circle. To do this, constraining the properties independently isn&rsquo;t sufficient. We need to be able to constrain the <code>Point</code> (or indeed any shape) and have that constraint, in turn, constrain the properties of that <code>Point</code> (or shape). This article, is however, long enough. We shall deal with that in part two!</p>
+</div>
+</article>
+</div>
+</main>
+<footer class=site-footer>
+<div class=wrapper>
+<h2 class=footer-heading>Garbage Collection</h2>
+<div class=footer-col-wrapper>
+<div class="footer-col footer-col-1">
+<ul class=contact-list>
+<li>
+Richard Vodden
+</li>
+<li><a href=mailto:richard@vodden.com>richard@vodden.com</a></li>
+</ul>
+</div>
+<div class="footer-col footer-col-2">
+<ul class=social-media-list>
+<li><a href=https://github.com/rvodden><span class="icon icon--github"><svg viewBox="0 0 16 16" width="16" height="16"><path fill="#828282" d="M7.999.431C3.714.431.239 3.905.239 8.192c0 3.428 2.223 6.337 5.307 7.363.388.071.53-.168.53-.374.0-.184-.007-.672-.01-1.32-2.159.469-2.614-1.04-2.614-1.04-.353-.896-.862-1.135-.862-1.135-.705-.481.053-.472.053-.472.779.055 1.189.8 1.189.8.692 1.186 1.816.843 2.258.645.071-.502.271-.843.493-1.037C4.86 11.425 3.049 10.76 3.049 7.786c0-.847.302-1.54.799-2.082C3.768 5.507 3.501 4.718 3.924 3.65c0 0 .652-.209 2.134.796C6.677 4.273 7.34 4.187 8 4.184c.659.003 1.323.089 1.943.261 1.482-1.004 2.132-.796 2.132-.796.423 1.068.157 1.857.077 2.054.497.542.798 1.235.798 2.082.0 2.981-1.814 3.637-3.543 3.829.279.24.527.713.527 1.437.0 1.037-.01 1.874-.01 2.129.0.208.14.449.534.373 3.081-1.028 5.302-3.935 5.302-7.362.0-4.285-3.475-7.76-7.761-7.76z"/></svg>
+</span><span class=username>rvodden</span></a>
+</li>
+<li><a href=https://twitter.com/rvodden><span class="icon icon--twitter"><svg viewBox="0 0 16 16" width="16" height="16"><path fill="#828282" d="M15.969 3.058c-.586.26-1.217.436-1.878.515.675-.405 1.194-1.045 1.438-1.809-.632.375-1.332.647-2.076.793-.596-.636-1.446-1.033-2.387-1.033-1.806.0-3.27 1.464-3.27 3.27.0.256.029.506.085.745C5.163 5.404 2.753 4.102 1.14 2.124.859 2.607.698 3.168.698 3.767c0 1.134.577 2.135 1.455 2.722C1.616 6.472 1.112 6.325.671 6.08c0 .014.0.027.0.041.0 1.584 1.127 2.906 2.623 3.206C3.02 9.402 2.731 9.442 2.433 9.442c-.211.0-.416-.021-.615-.059.416 1.299 1.624 2.245 3.055 2.271-1.119.877-2.529 1.4-4.061 1.4-.264.0-.524-.015-.78-.046 1.447.928 3.166 1.469 5.013 1.469 6.015.0 9.304-4.983 9.304-9.304.0-.142-.003-.283-.009-.423C14.976 4.29 15.531 3.714 15.969 3.058z"/></svg>
+</span><span class=username>rvodden</span></a>
+</li>
+</ul>
+</div>
+<div class="footer-col footer-col-3">
+<p>This is a collection of all the garbage which comes out of my mind.</p>
+</div>
+</div>
+</div>
+</footer>
+</body>
+</html>
