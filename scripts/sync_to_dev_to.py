@@ -1,7 +1,7 @@
 import difflib as dl
 import logging
 from re import I
-from hugo_to_dev_to import convert_hugo_article_to_dev_to, split_preamble_and_content
+from hugo_to_dev_to import convert_hugo_article_to_dev_to, split_preamble_and_content, convert_to_body_markdown
 from typing import Any, Dict, List, Tuple
 
 from dev_to import Client as DevToClient
@@ -102,7 +102,7 @@ def main():
     for article in update_articles:
         print(f"Updating '{article['title']}...'")
         try:
-            devToClient.update_article(article['id'], article['generated_content'])
+            devToClient.update_article(article['id'], convert_to_body_markdown(article['generated_content']))
         except IOError as err:
             article['result'] = 'failure'
             article['error'] = err

@@ -1,6 +1,7 @@
-from io import TextIOWrapper
 from typing import Dict
-import re, yaml
+import click, re, yaml
+from ruamel.yaml import YAML
+from io import StringIO
 
 def displaymatch(match):
     if match is None:
@@ -14,7 +15,7 @@ START_LATEX_INLINE = r"{% katex inline %}"
 END_LATEX_INLINE = r"{% endkatex %}"
 
 def remove_comments(contents: str) -> str:
-    REMOVE_COMMENTS_PATTERN = re.compile(f"{START_COMMENT}.*{END_COMMENT}", flags=re.MULTILINE | re.DOTALL)
+    REMOVE_COMMENTS_PATTERN = re.compile(f"{START_COMMENT}.*?{END_COMMENT}", flags=re.MULTILINE | re.DOTALL)
     return re.sub(REMOVE_COMMENTS_PATTERN, "", contents)
 
 def replace_latex_delimeters(contents: str) -> str:
@@ -65,6 +66,13 @@ def convert_preamble(preamable: Dict[str, str], filename: str) -> Dict[str, str]
     retval['canonical_url'] = canonical_url(filename)
     return retval
 
+def convert_to_body_markdown(article: Dict[str, str]) -> str:
+    stream = StringIO()
+    yaml = YAML()
+    yaml.dump(article['preamble'], stream)
+    preamble = stream.getvalue()
+    return f"---\n{preamble}---\n{article['content']}\n"
+
 def convert_hugo_article_to_dev_to(article: str) -> Dict[str,str]:
     retval = {}
     
@@ -72,3 +80,17 @@ def convert_hugo_article_to_dev_to(article: str) -> Dict[str,str]:
     retval['content'] = convert_content(article['content'])
 
     return retval
+
+@click.command()
+@click.argument('filename', type=click.Path(exists=True))
+def main(filename):
+    with open(filename) as file:
+        text = file.read()
+    article = split_preamble_and_content(text)
+    article['filename']=filename
+    dev_to_article = convert_hugo_article_to_dev_to(article)
+    dev_to_article = convert_to_body_markdown(dev_to_article)
+    print(dev_to_article)
+
+if __name__ == '__main__':
+    main()

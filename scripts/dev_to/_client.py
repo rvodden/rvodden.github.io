@@ -1,6 +1,4 @@
-from io import StringIO
 import json, os, yaml
-from ruamel.yaml import YAML
 from re import I
 from typing import Dict, List
 from pydantic import parse_obj_as
@@ -94,17 +92,8 @@ class Client():
         }
         self._post(f"https://dev.to/api/articles/", json.dumps(request_data))
     
-    @staticmethod
-    def _convert_to_body_markdown(article: Dict[str, str]) -> str:
-        stream = StringIO()
-        yaml = YAML()
-        yaml.dump(article['preamble'], stream)
-        preamble = stream.getvalue()
-        return f"---\n{preamble}---\n{article['content']}\n"
 
-    def update_article(self, id: int, article: Dict[str,str]):
-        body_markdown = self._convert_to_body_markdown(article)
-        print(body_markdown)
+    def update_article(self, id: int, body_markdown: Dict[str,str]):
         request_data = {
             "article": {
                 "body_markdown": body_markdown
