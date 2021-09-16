@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Categories on Garbage Collection</title>
+    <link>https://vodden.com/categories/</link>
+    <description>Recent content in Categories on Garbage Collection</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-gb</language>
+    <lastBuildDate>Mon, 06 Sep 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://vodden.com/categories/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>geometry</title>
+      <link>https://vodden.com/categories/geometry/</link>
+      <pubDate>Mon, 06 Sep 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://vodden.com/categories/geometry/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>pysketcher</title>
+      <link>https://vodden.com/categories/pysketcher/</link>
+      <pubDate>Mon, 06 Sep 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://vodden.com/categories/pysketcher/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>python</title>
+      <link>https://vodden.com/categories/python/</link>
+      <pubDate>Mon, 06 Sep 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://vodden.com/categories/python/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>solver</title>
+      <link>https://vodden.com/categories/solver/</link>
+      <pubDate>Mon, 06 Sep 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://vodden.com/categories/solver/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

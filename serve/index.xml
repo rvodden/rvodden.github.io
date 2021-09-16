@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Garbage Collection</title>
+    <link>https://vodden.com/</link>
+    <description>Recent content on Garbage Collection</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-gb</language>
+    <lastBuildDate>Mon, 06 Sep 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://vodden.com/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Writing a Geometric Solver in Python - Part 1: Modelling Constraints</title>
+      <link>https://vodden.com/posts/constraining-the-point/</link>
+      <pubDate>Mon, 06 Sep 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://vodden.com/posts/constraining-the-point/</guid>
+      <description>PySketcher is little library which I maintain which makes it simple (hopefully) to draw geometric images. It was originally written by Hans Petter Langtangen, who sadly passed away in 2016, and since 2019 I&amp;rsquo;ve been keeping it up to date and adding features.
+Right now, PySketcher only supports absolute positioning of shapes. This means that you have to know exactly where you&amp;rsquo;d like the center of your circle to be and exactly what radius it should have.</description>
+    </item>
+    
+    <item>
+      <title>MathJax and Hugo</title>
+      <link>https://vodden.com/posts/mathjax-and-hugo/</link>
+      <pubDate>Sun, 07 Mar 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://vodden.com/posts/mathjax-and-hugo/</guid>
+      <description>The is a marvelous article which explains how to use Hugo and MathJax in close harmony. Unfortunately it was written a while ago and only works for MathJax 2.x. This article updates the content of the original to MathJax &amp;gt; 3.1. The original is still worth reading as it nicely explains the functionality.
+Firstly MathJax &amp;gt; 3.0 likes to have pollyfill. So the script inclusion should look like this:
+1 2  &amp;lt;script src=&amp;#34;https://polyfill.</description>
+    </item>
+    
+    <item>
+      <title>Let&#39;s Git ready to rumble</title>
+      <link>https://vodden.com/posts/lets-git-ready-to-rumble/</link>
+      <pubDate>Wed, 20 Dec 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://vodden.com/posts/lets-git-ready-to-rumble/</guid>
+      <description>Solving it If found myself with a rather strange git problem. As far as I was aware, I was tracking a remote, however when ever I git a git pull, my bash prompt would show me as having commits outstanding.
+[voddenr:~/repository] master(4)+i ± Looking at the commit tree, it would seem that origin/HEAD and origin/master have not been correctly updated:
+* f786359 - (HEAD -&amp;gt; master) Merge everything together. (3 hours ago) &amp;lt;Richard Vodden&amp;gt; | * 51955ca - Wrote some code.</description>
+    </item>
+    
+    <item>
+      <title>Richard Vodden</title>
+      <link>https://vodden.com/about/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://vodden.com/about/</guid>
+      <description>I am a DevOps SME and Agile Coach. Equally comfortable driving a DevOps transformation at a strategic level, or effecting hands on implementation; the depth and breadth of my DevOps capability is unique. I have a background in Infrastructure and Solution Architecture, and over 15 years I have built up an expertise in SDLC and build chain optimization. I am equally comfortably in hands on and architecture roles and bring a pragmatic approach to process improvement and optimization to any project or organisation.</description>
+    </item>
+    
+  </channel>
+</rss>

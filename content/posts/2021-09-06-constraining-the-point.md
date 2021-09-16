@@ -1,13 +1,18 @@
 ---
-title: Constraining the Point
-series: 
-- Making PySketcher more Intelligent
+title: "Writing a Geometric Solver in Python - Part 1: Modelling Constraints"
+series:
+  - PySketcher Geometric Solver
 categories:
-- pysketcher
-- python
-draft: False
+  - python
+  - pysketcher
+  - geometry
+  - solver
+draft: false
 description: >
-    We look at how we might represent a set of geometric relationships in a class hierarchy. We partially implement this for a `Point` object, and consider the developer experience.
+    I describe, over the series, how to implement a geometric solver in
+    Python. In this article we look at how we might represent a set of geometric
+    relationships in a class hierarchy. We partially implement this for a
+    `Point`object, and consider the developer experience.
 ---
 
 [PySketcher](https://github.com/rvodden/pysketcher) is little library which I maintain which makes it simple (hopefully) to draw geometric images. It was originally written by Hans Petter Langtangen, who sadly passed away in 2016, and since 2019 I've been keeping it up to date and adding features.
@@ -19,8 +24,8 @@ I'd like to add a facility for a user to describe the various geometric features
 This presents some interesting challenges:
 
 1. How will the relationships between the shapes be represented.
-1. Once the relationships are understood, how will we work out where the shapes should go? Can we do this without creating performance issues?
-1. What should the experience be for the developer coding a diagram when they want to represent relationships in code?
+2. Once the relationships are understood, how will we work out where the shapes should go? Can we do this without creating performance issues?
+3. What should the experience be for the developer coding a diagram when they want to represent relationships in code?
 
 At first glance it may look like the first and last items are the same. In fact, the representation and the developer experience are separate concerns. For example if I wish to specify that two lines are parallel, I am constraining the gradient of the 2<sup>nd</sup> line to be the same as the first. I don't think there is any argument that the concept of "parallel" is more intuitive, however a gradient equality constraint may make more sense from an implementation perspective.
 
@@ -723,6 +728,7 @@ class ConstrainedValue:
         constraint_set = self.__get__(instance)
         constraint_set.reset_constraints()
         constraint_set.constrain_with(FixedValueConstraint(value))
+#... {{% /skip %}}
 ```
 And finally, [as there is no easy way to work out the name of the variable to which an instance has been defined](https://stackoverflow.com/questions/1690400/getting-an-instance-name-inside-class-init), we'll update the `Point` class to optionally take a name at creation time. This is less than ideal, and I may well fix it later, but I don't want us to get distracted away from constraint modelling!
 
@@ -742,7 +748,6 @@ class Point:
     @property
     def name(self):
         return self._name
-# {{% /skip %}}
 ```
 
 Check that worked:
@@ -827,6 +832,7 @@ class ConstraintSet:
         """Removes the existing constraints from the constraint set"""
         self._constraints = []
 
+# {{% /skip %}}
     def resolve(self):
         """Naive implementation to aid testing"""
         for constraint in self._constraints:
@@ -837,6 +843,7 @@ class ConstraintSet:
 
         raise UnderconstrainedError("Fixed Value has not been provided.")
     
+#... {{% skip %}}
     def __repr__(self):
         retval = "ConstraintSet("
         if len(self._constraints) == 0:

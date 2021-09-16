@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>python on Garbage Collection</title>
+    <link>https://vodden.com/categories/python/</link>
+    <description>Recent content in python on Garbage Collection</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-gb</language>
+    <lastBuildDate>Mon, 06 Sep 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://vodden.com/categories/python/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Writing a Geometric Solver in Python - Part 1: Modelling Constraints</title>
+      <link>https://vodden.com/posts/constraining-the-point/</link>
+      <pubDate>Mon, 06 Sep 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://vodden.com/posts/constraining-the-point/</guid>
+      <description>PySketcher is little library which I maintain which makes it simple (hopefully) to draw geometric images. It was originally written by Hans Petter Langtangen, who sadly passed away in 2016, and since 2019 I&amp;rsquo;ve been keeping it up to date and adding features.
+Right now, PySketcher only supports absolute positioning of shapes. This means that you have to know exactly where you&amp;rsquo;d like the center of your circle to be and exactly what radius it should have.</description>
+    </item>
+    
+  </channel>
+</rss>
