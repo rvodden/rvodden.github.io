@@ -1,5 +1,6 @@
 click
 requests
 requests_toolbelt
+phmdoctest
 pydantic
 ruamel.yaml
