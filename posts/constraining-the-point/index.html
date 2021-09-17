@@ -12,7 +12,7 @@
 ">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://vodden.com/posts/constraining-the-point/"><meta property="article:section" content="posts">
-<meta property="article:modified_time" content="2021-09-16T15:13:48+01:00">
+<meta property="article:modified_time" content="2021-09-17T16:45:47+01:00">
 <meta name=twitter:card content="summary">
 <meta name=twitter:title content="Writing a Geometric Solver in Python - Part 1: Modelling Constraints">
 <meta name=twitter:description content="I describe, over the series, how to implement a geometric solver in Python. In this article we look at how we might represent a set of geometric relationships in a class hierarchy. We partially implement this for a `Point`object, and consider the developer experience.
@@ -118,9 +118,6 @@ Garbage Collection
 </span><span class=lnt id=11><a style=outline:none;text-decoration:none;color:inherit href=#11>11</a>
 </span><span class=lnt id=12><a style=outline:none;text-decoration:none;color:inherit href=#12>12</a>
 </span><span class=lnt id=13><a style=outline:none;text-decoration:none;color:inherit href=#13>13</a>
-</span><span class=lnt id=14><a style=outline:none;text-decoration:none;color:inherit href=#14>14</a>
-</span><span class=lnt id=15><a style=outline:none;text-decoration:none;color:inherit href=#15>15</a>
-</span><span class=lnt id=16><a style=outline:none;text-decoration:none;color:inherit href=#16>16</a>
 </span></code></pre></td>
 <td class=lntd>
 <pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=kn>from</span> <span class=nn>abc</span> <span class=kn>import</span> <span class=n>ABC</span>
@@ -132,9 +129,6 @@ Garbage Collection
 <span class=k>class</span> <span class=nc>FixedValueConstraint</span><span class=p>(</span><span class=n>Constraint</span><span class=p>):</span>
     <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>value</span><span class=p>):</span>
         <span class=bp>self</span><span class=o>.</span><span class=n>_value</span> <span class=o>=</span> <span class=n>value</span>
-
-    <span class=k>def</span> <span class=nf>check</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>t</span><span class=p>):</span>
-        <span class=k>return</span> <span class=n>t</span> <span class=o>==</span> <span class=bp>self</span><span class=o>.</span><span class=n>_value</span>
 
     <span class=nd>@property</span>
     <span class=k>def</span> <span class=nf>value</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
