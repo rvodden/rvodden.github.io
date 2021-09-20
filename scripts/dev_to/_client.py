@@ -1,4 +1,6 @@
+from io import StringIO
 import json, os, yaml
+from ruamel.yaml import YAML
 from re import I
 from typing import Dict, List
 from pydantic import parse_obj_as
@@ -77,6 +79,14 @@ class Client():
 
     def _put(self, url:str, data: str):
         return self._session.put(url, data=data, headers={'api_key': self._api_token, 'Content-Type': 'application/json'})
+
+    def _convert_to_body_markdown(self, article: Dict[str, str]) -> str:
+        # TODO: This is duplicated in hugo_to_dev_to
+        stream = StringIO()
+        yaml = YAML()
+        yaml.dump(article['preamble'], stream)
+        preamble = stream.getvalue()
+        return f"---\n{preamble}---\n{article['content']}\n"
 
     def get_articles(self):
         data = self._get("https://dev.to/api/articles/me/all")
