@@ -48,28 +48,9 @@ Garbage Collection
 </p>
 </header>
 <div class=post-content itemprop=articleBody>
-<p>This is the second article in a short series about adding a geometric solver for my
-<a href=https://github.com/rvodden/pysketcher>PySketcher</a> side project. The basic premise is that instead
-of having to tell PySketcher exactly where you&rsquo;d like your shapes to be, you&rsquo;ll be able to specify
-the relationships the shapes have to each other, and PySketcher will be able to work our where they
-need to go. Have a read of <a href>Part 1</a> for more details, and for an explanation of how we&rsquo;ve built up
-the model so far.</p>
+<p>This is the second article in a short series about adding a geometric solver for my <a href=https://github.com/rvodden/pysketcher>PySketcher</a> side project. The basic premise is that instead of having to tell PySketcher exactly where you&rsquo;d like your shapes to be, you&rsquo;ll be able to specify the relationships the shapes have to each other, and PySketcher will be able to work our where they need to go. Have a read of <a href>Part 1</a> for more details, and for an explanation of how we&rsquo;ve built up the model so far.</p>
 <h2 id=recapitulation>Recapitulation</h2>
-<p>We&rsquo;ve built a model, which consists of a <code>ConstrainedValue</code> class. This class is a <code>Descriptor</code> and
-is assigned to classes. When <code>ConstrainedValue</code> is used in a class, that class will store
-<code>ConstraintSet</code> objects instead of raw values. This means that we can use the <code>constrain_with</code>
-method of <code>ConstraintSet</code> to indicate that the value of that <code>ConstraintSet</code> is in some way
-constrained. We built a trivial constraint <code>FixedValueConstraint</code> which indicates that the value of
-a <code>ConstraintSet</code> is constrained to, unsurprisingly, a fixed value. We also built a
-<code>LinkedValueConstraint</code> which indicates that a <code>ConstraintSet</code> is constrained to the value of
-another <code>ConstraintSet</code>. We implemented a throwaway <code>resolve</code> method on <code>ConstraintSet</code> so that we
-can test how our model hangs together. Finally we spent some time ensuring that the experience was
-intuitive for people using the model, and that it was possible to interrogate the model to see how
-things are stitched together. Whilst we were considering the concepts above we implemented a small
-<code>Point</code> object and used that, with our throwaway <code>revolve</code> method, to illustrate that our modelling
-code is effective. The full code is available in <a href=https://gist.github.com/rvodden/c5d7d6ecea734006469d8dc758f9d1ae>this
-gist</a>, and this is an example of
-it in use:</p>
+<p>We&rsquo;ve built a model, which consists of a <code>ConstrainedValue</code> class. This class is a <code>Descriptor</code> and is assigned to classes. When <code>ConstrainedValue</code> is used in a class, that class will store <code>ConstraintSet</code> objects instead of raw values. This means that we can use the <code>constrain_with</code> method of <code>ConstraintSet</code> to indicate that the value of that <code>ConstraintSet</code> is in some way constrained. We built a trivial constraint <code>FixedValueConstraint</code> which indicates that the value ofa <code>ConstraintSet</code> is constrained to, unsurprisingly, a fixed value. We also built a<code>LinkedValueConstraint</code> which indicates that a <code>ConstraintSet</code> is constrained to the value of another <code>ConstraintSet</code>. We implemented a throwaway <code>resolve</code> method on <code>ConstraintSet</code> so that we can test how our model hangs together. Finally we spent some time ensuring that the experience was intuitive for people using the model, and that it was possible to interrogate the model to see how things are stitched together. Whilst we were considering the concepts above we implemented a small<code>Point</code> object and used that, with our throwaway <code>revolve</code> method, to illustrate that our modelling code is effective. The full code is available in <a href=https://gist.github.com/rvodden/c5d7d6ecea734006469d8dc758f9d1ae>this gist</a>, and this is an example of it in use:</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
@@ -106,9 +87,9 @@ it in use:</p>
 
     <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>name</span><span class=o>=</span><span class=s2>&#34;&#34;</span><span class=p>,</span> <span class=n>x</span><span class=o>=</span><span class=kc>None</span><span class=p>,</span> <span class=n>y</span><span class=o>=</span><span class=kc>None</span><span class=p>):</span>
         <span class=bp>self</span><span class=o>.</span><span class=n>_name</span> <span class=o>=</span> <span class=n>name</span>
-        <span class=k>if</span> <span class=n>x</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span> 
+        <span class=k>if</span> <span class=n>x</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
             <span class=bp>self</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=n>x</span>
-        <span class=k>if</span> <span class=n>y</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span> <span class=p>:</span> 
+        <span class=k>if</span> <span class=n>y</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span> <span class=p>:</span>
             <span class=bp>self</span><span class=o>.</span><span class=n>y</span> <span class=o>=</span> <span class=n>y</span>
 
     <span class=nd>@property</span>
@@ -133,16 +114,9 @@ q.x is ConstraintSet(
 )
 q.x resolves to 1
 Now p.x has changed, q.x resolves to 2
-</code></pre><p>Top line stuff. We can define an object with some parameters and constrain those parameters using
-neat little constraints which are tiny standalone objects in themselves.</p>
+</code></pre><p>Top line stuff. We can define an object with some parameters and constrain those parameters using neat little constraints which are tiny standalone objects in themselves.</p>
 <h2 id=drawing-a-line-under-it>Drawing a line under it</h2>
-<p>Next, we&rsquo;d like to be able
-to represent more complex relationships. We may, for example, wish to constrain our point to being
-on a line, or perhaps on the circumference of a circle. In both of these examples the value of <code>x</code>
-is only known if the value of <code>y</code> is known and visa versa; yet neither can take arbitrary values.
-Before we consider how we might do that, let&rsquo;s build a simple line object. For the moment we won&rsquo;t
-worry about using <code>ConstrainedValue</code> in this line, as we wish to constrain the point to the line. We
-can revisit the <code>Line</code> object later on when we&rsquo;ve established some patterns.</p>
+<p>Next, we&rsquo;d like to be able to represent more complex relationships. We may, for example, wish to constrain our point to being on a line, or perhaps on the circumference of a circle. In both of these examples the value of <code>x</code>is only known if the value of <code>y</code> is known and visa versa; yet neither can take arbitrary values.Before we consider how we might do that, let&rsquo;s build a simple line object. For the moment we won&rsquo;t worry about using <code>ConstrainedValue</code> in this line, as we wish to constrain the point to the line. We can revisit the <code>Line</code> object later on when we&rsquo;ve established some patterns.</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
@@ -174,10 +148,7 @@ can revisit the <code>Line</code> object later on when we&rsquo;ve established s
 </code></pre></td></tr></table>
 </div>
 </div><pre tabindex=0><code>Line&lt;(0,1),(2,3)&gt;
-</code></pre><p>As you can see, we&rsquo;ve kept this super simple, and haven&rsquo;t even defined properties for <code>x1</code>, <code>x2</code>
-etc. It should serve our needs for the moment. Now how might we indicate that our <code>Point</code> is
-constrained to this line? The answer is surprisingly simple. The <code>Point</code> needs to be able to
-accept a constraint, and the easiest way to do that is to have it inherit from <code>ConstraintSet</code>:</p>
+</code></pre><p>As you can see, we&rsquo;ve kept this super simple, and haven&rsquo;t even defined properties for <code>x1</code>, <code>x2</code>etc. It should serve our needs for the moment. Now how might we indicate that our <code>Point</code> is constrained to this line? The answer is surprisingly simple. The <code>Point</code> needs to be able to accept a constraint, and the easiest way to do that is to have it inherit from <code>ConstraintSet</code>:</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
@@ -204,9 +175,9 @@ accept a constraint, and the easiest way to do that is to have it inherit from <
     <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>name</span><span class=o>=</span><span class=s2>&#34;&#34;</span><span class=p>,</span> <span class=n>x</span><span class=o>=</span><span class=kc>None</span><span class=p>,</span> <span class=n>y</span><span class=o>=</span><span class=kc>None</span><span class=p>):</span>
         <span class=nb>super</span><span class=p>()</span><span class=o>.</span><span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>)</span>
         <span class=bp>self</span><span class=o>.</span><span class=n>_name</span> <span class=o>=</span> <span class=n>name</span>
-        <span class=k>if</span> <span class=n>x</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span> 
+        <span class=k>if</span> <span class=n>x</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
             <span class=bp>self</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=n>x</span>
-        <span class=k>if</span> <span class=n>y</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span> <span class=p>:</span> 
+        <span class=k>if</span> <span class=n>y</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span> <span class=p>:</span>
             <span class=bp>self</span><span class=o>.</span><span class=n>y</span> <span class=o>=</span> <span class=n>y</span>
 
     <span class=nd>@property</span>
@@ -214,12 +185,7 @@ accept a constraint, and the easiest way to do that is to have it inherit from <
         <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>_name</span>
 </code></pre></td></tr></table>
 </div>
-</div><p>Here the only changes are the first line of the class, which specifies <code>ConstraintSet</code> as a
-superclass, and the first line of <code>__init__</code> which adds the call to the superclass initializer. As
-we&rsquo;ve now inherited from <code>ConstraintSet</code>, our <code>Point</code> class has a <code>constrain_with</code> method which can
-use to supply a <code>Constraint</code> which indicates that our point should be constrained to a <code>Line</code>. The
-fancy pants maths people say that if a point is on a line, then it &ldquo;coincident&rdquo;, so let&rsquo;s use their
-fancy pants language and define a <code>CoincidentConstraint</code>:</p>
+</div><p>Here the only changes are the first line of the class, which specifies <code>ConstraintSet</code> as a superclass, and the first line of <code>__init__</code> which adds the call to the superclass initializer. As we&rsquo;ve now inherited from <code>ConstraintSet</code>, our <code>Point</code> class has a <code>constrain_with</code> method which can use to supply a <code>Constraint</code> which indicates that our point should be constrained to a <code>Line</code>. The fancy pants maths people say that if a point is on a line, then it &ldquo;coincident&rdquo;, so let&rsquo;s use their fancy pants language and define a <code>CoincidentConstraint</code>:</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
@@ -242,7 +208,7 @@ fancy pants language and define a <code>CoincidentConstraint</code>:</p>
 <pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>CoincidentConstraint</span><span class=p>(</span><span class=n>Constraint</span><span class=p>):</span>
     <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>line</span><span class=p>):</span>
         <span class=bp>self</span><span class=o>.</span><span class=n>_line</span> <span class=o>=</span> <span class=n>line</span>
-    
+
     <span class=nd>@property</span>
     <span class=k>def</span> <span class=nf>line</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
         <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>_line</span>
@@ -260,19 +226,15 @@ fancy pants language and define a <code>CoincidentConstraint</code>:</p>
     CoincidentConstraint&lt;Line&lt;(1,2),(3,4)&gt;&gt;
 )
 </code></pre><h2 id=crisis-of-identity>Crisis of identity</h2>
-<p>Well our point is now telling us that it&rsquo;s constrained, and is listing out the constraints
-correctly, but it seems to be having a bit of an identity crisis. It&rsquo;s telling us that it&rsquo;s a
-<code>ConstraintSet</code>, and whilst that is true to a certain extent, it should really tell us that it is a
-<code>Point</code>. The issue is because when we originally wrote the <code>__repr__</code> method in <code>ConstraintSet</code> we
-hardcoded the class name (tsk). Let&rsquo;s address that:</p>
+<p>Well our point is now telling us that it&rsquo;s constrained, and is listing out the constraints correctly, but it seems to be having a bit of an identity crisis. It&rsquo;s telling us that it&rsquo;s a<code>ConstraintSet</code>, and whilst that is true to a certain extent, it should really tell us that it is a<code>Point</code>. The issue is because when we originally wrote the <code>__repr__</code> method in <code>ConstraintSet</code> we hardcoded the class name (tsk). Let&rsquo;s address that:</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
 </span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2> 2</a>
 </span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3> 3</a>
 </span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4> 4</a>
-</span><span class=hl><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
-</span></span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
 </span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7> 7</a>
 </span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8> 8</a>
 </span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9> 9</a>
@@ -291,17 +253,17 @@ hardcoded the class name (tsk). Let&rsquo;s address that:</p>
 <td class=lntd>
 <pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>ConstraintSet</span><span class=p>:</span>
 <span class=c1>#... </span>
-    
+
     <span class=k>def</span> <span class=fm>__repr__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
-<span class=hl>        <span class=n>retval</span> <span class=o>=</span> <span class=sa>f</span><span class=s2>&#34;</span><span class=si>{</span><span class=bp>self</span><span class=o>.</span><span class=vm>__class__</span><span class=o>.</span><span class=vm>__name__</span><span class=si>}</span><span class=s2>(&#34;</span>
-</span>        <span class=k>if</span> <span class=nb>len</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=p>)</span> <span class=o>==</span> <span class=mi>0</span><span class=p>:</span>
+        <span class=n>retval</span> <span class=o>=</span> <span class=sa>f</span><span class=s2>&#34;</span><span class=si>{</span><span class=bp>self</span><span class=o>.</span><span class=vm>__class__</span><span class=o>.</span><span class=vm>__name__</span><span class=si>}</span><span class=s2>(&#34;</span>
+        <span class=k>if</span> <span class=nb>len</span><span class=p>(</span><span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=p>)</span> <span class=o>==</span> <span class=mi>0</span><span class=p>:</span>
             <span class=n>retval</span> <span class=o>+=</span> <span class=s2>&#34;)&#34;</span>
             <span class=k>return</span> <span class=n>retval</span>
 
         <span class=k>for</span> <span class=n>constraint</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=p>:</span>
             <span class=n>retval</span> <span class=o>+=</span> <span class=sa>f</span><span class=s2>&#34;</span><span class=se>\n</span><span class=s2>    </span><span class=si>{</span><span class=n>constraint</span><span class=si>}</span><span class=s2>&#34;</span>
         <span class=n>retval</span> <span class=o>+=</span> <span class=s2>&#34;</span><span class=se>\n</span><span class=s2>)&#34;</span>
-        <span class=k>return</span> <span class=n>retval</span> 
+        <span class=k>return</span> <span class=n>retval</span>
 
 <span class=c1>#... </span>
 
@@ -332,41 +294,10 @@ hardcoded the class name (tsk). Let&rsquo;s address that:</p>
 </code></pre></td></tr></table>
 </div>
 </div><pre tabindex=0><code>ConstraintSet()
-</code></pre><p>That&rsquo;s not so good. Whilst it is true that we have not directly constrained the <code>x</code> coordinate, it
-is not true that the <code>x</code> coordinate is not constrained. It would be much better if the <code>x</code>
-coordinate could tell us that it was being constrained by the <code>ConicidentConstraint</code> at the <code>Point</code> level.
-We could just have the <code>constrain_with</code> method apply the <code>ConicidentConstraint</code> to the <code>x</code> and <code>y</code>
-coordinates, and this is certainly a valid approach.</p>
-<p>However, let&rsquo;s think more broadly than our current scenario for a moment. We may, for example, be
-constraining a line to be horizontal. A line (or at least our line) is defined by two points, which
-in turn are each defined by two values, their <code>x</code> and <code>y</code> co-ordinates. Constraining a line to being
-horizontal is only constraining the <code>y</code> co-ordinates of those two point (constraining them to being
-equal) and there is no way that our <code>constrain_with</code> method can know this. If we were to just apply
-the <code>HorizontalConstraint</code> to all the properties then we&rsquo;d end up with the <code>x</code> co-ordinates showing
-the that they were constrained, which is misleading.</p>
-<p>So we need an alternative approach. It is only really our <code>Constraint</code> implementations which will
-understand which properties need to be constrained. So we need a mechanism for the <code>constrain_with</code>
-method to give the constraint the means to, in turn, constrain the ßproperties of the
-object it is constraining. To achieve this we&rsquo;ll use a design pattern called a &ldquo;callback&rdquo;. We&rsquo;ll
-define a <code>constrain_callback</code> method on the <code>Constraint</code> which accepts a <code>ConstraintSet</code> object.
-Then we will update our <code>constrain_with</code> method to call that <code>constrain_callback</code> method. The
-<code>constrain_callback</code> method can then be overridden by the various implementations of <code>Constraint</code> to
-apply the necessary downstream constraints.</p>
-<p>So step 1, we need to modify our <code>Constraint</code> definition to include a <code>constraint_callback</code> method.
-We face a design decision at this point. We can either declare this method to be an
-<code>@abstractmethod</code> which will force implementations of <code>Constraint</code> to implement it, or we can
-provide a default implementation, which will do nothing, meaning that our implementations can just
-pretend the <code>constraint_callback</code> doesn&rsquo;t exist if they don&rsquo;t wish to constrain properties. It&rsquo;s not particularly clear which direction we
-should go here. If we provide a default implementation then we risk our users forgetting that it
-needs to be implemented, and therefore some nasty bugs. If we don&rsquo;t then implementations will have
-to explicitly state that they want the <code>constraint_callback</code> to do nothing. This is simply a
-question of style, neither option is particularly better than the other. For pythonic questions of
-style we should always refer to <a href=https://www.python.org/dev/peps/pep-0020/>PEP20 - the zen of
-python</a> and yet again, in this case, it does not let us
-down. Rule 2 is &ldquo;Explicit is better than implicit.&rdquo; so rather than providing a default
-implementation which implicitly does nothing, we will require our implementations to provide an
-explicit implementation of the method which does nothing (if that&rsquo;s what they require). In practice
-this means that we will decorate our method with <code>@abstractmethod</code>:</p>
+</code></pre><p>That&rsquo;s not so good. Whilst it is true that we have not directly constrained the <code>x</code> coordinate, it is not true that the <code>x</code> coordinate is not constrained. It would be much better if the <code>x</code>coordinate could tell us that it was being constrained by the <code>CoincidentConstraint</code> at the <code>Point</code> level.We could just have the <code>constrain_with</code> method apply the <code>CoincidentConstraint</code> to the <code>x</code> and <code>y</code>coordinates, and this is certainly a valid approach.</p>
+<p>However, let&rsquo;s think more broadly than our current scenario for a moment. We may, for example, be constraining a line to be horizontal. A line (or at least our line) is defined by two points, which in turn are each defined by two values, their <code>x</code> and <code>y</code> co-ordinates. Constraining a line to being horizontal is only constraining the <code>y</code> co-ordinates of those two point (constraining them to being equal) and there is no way that our <code>constrain_with</code> method can know this. If we were to just apply the <code>HorizontalConstraint</code> to all the properties then we&rsquo;d end up with the <code>x</code> co-ordinates showing the that they were constrained, which is misleading.</p>
+<p>So we need an alternative approach. It is only really our <code>Constraint</code> implementations which will understand which properties need to be constrained. So we need a mechanism for the <code>constrain_with</code>method to give the constraint the means to, in turn, constrain the properties of the object it is constraining. To achieve this we&rsquo;ll use a design pattern called a &ldquo;callback&rdquo;. We&rsquo;ll define a <code>constrain_callback</code> method on the <code>Constraint</code> which accepts a <code>ConstraintSet</code> object.Then we will update our <code>constrain_with</code> method to call that <code>constrain_callback</code> method. The<code>constrain_callback</code> method can then be overridden by the various implementations of <code>Constraint</code> to apply the necessary downstream constraints.</p>
+<p>So step 1, we need to modify our <code>Constraint</code> definition to include a <code>constraint_callback</code> method.We face a design decision at this point. We can either declare this method to be an<code>@abstractmethod</code> which will force implementations of <code>Constraint</code> to implement it, or we can provide a default implementation, which will do nothing, meaning that our implementations can just pretend the <code>constraint_callback</code> doesn&rsquo;t exist if they don&rsquo;t wish to constrain properties. It&rsquo;s not particularly clear which direction we should go here. If we provide a default implementation then we risk our users forgetting that it needs to be implemented, and therefore some nasty bugs. If we don&rsquo;t then implementations will have to explicitly state that they want the <code>constraint_callback</code> to do nothing. This is simply a question of style, neither option is particularly better than the other. For pythonic questions of style we should always refer to <a href=https://www.python.org/dev/peps/pep-0020/>PEP20 - the zen of python</a> and yet again, in this case, it does not let us down. Rule 2 is &ldquo;Explicit is better than implicit.&rdquo; so rather than providing a default implementation which implicitly does nothing, we will require our implementations to provide an explicit implementation of the method which does nothing (if that&rsquo;s what they require). In practice this means that we will decorate our method with <code>@abstractmethod</code>:</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
@@ -382,17 +313,14 @@ this means that we will decorate our method with <code>@abstractmethod</code>:</
 <pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=kn>from</span> <span class=nn>abc</span> <span class=kn>import</span> <span class=n>ABC</span><span class=p>,</span> <span class=n>abstractmethod</span>
 
 <span class=k>class</span> <span class=nc>Constraint</span><span class=p>(</span><span class=n>ABC</span><span class=p>):</span>
-    <span class=s2>&#34;&#34;&#34;Used to restrict that value of a ```ConstrainedValue```.&#34;&#34;&#34;</span>
+    <span class=s2>&#34;&#34;&#34;Used to restrict that value of a `ConstrainedValue`.&#34;&#34;&#34;</span>
 
     <span class=nd>@abstractmethod</span>
     <span class=k>def</span> <span class=nf>constraint_callback</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>instance</span><span class=p>):</span>
         <span class=k>raise</span> <span class=ne>NotImplementedError</span><span class=p>(</span><span class=s2>&#34;`constraint_callback` must be implemented explicitly.&#34;</span><span class=p>)</span>
 </code></pre></td></tr></table>
 </div>
-</div><p>And as a direct result of our design decision we need to update our constraints to include a
-definition of that method. In the case of <code>FixedValueConstraint</code> and <code>LinkedValueConstraint</code> it can
-simply do nothing. <code>CoincidentConstraint</code> is a touch more complicated so we&rsquo;ll look at that a little
-later.</p>
+</div><p>And as a direct result of our design decision we need to update our constraints to include a definition of that method. In the case of <code>FixedValueConstraint</code> and <code>LinkedValueConstraint</code> it can simply do nothing. <code>CoincidentConstraint</code> is a touch more complicated so we&rsquo;ll look at that a little later.</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
@@ -425,8 +353,8 @@ later.</p>
 </span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3>3</a>
 </span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4>4</a>
 </span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5>5</a>
-</span><span class=hl><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6>6</a>
-</span></span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7>7</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6>6</a>
+</span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7>7</a>
 </span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8>8</a>
 </span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9>9</a>
 </span></code></pre></td>
@@ -436,18 +364,13 @@ later.</p>
 
     <span class=k>def</span> <span class=nf>constrain_with</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>constraint</span><span class=p>):</span>
         <span class=n>constraint</span><span class=o>.</span><span class=n>constraint_callback</span><span class=p>(</span><span class=bp>self</span><span class=p>)</span>
-<span class=hl>        <span class=s2>&#34;&#34;&#34;Add a constraint to this objects list of constraints.&#34;&#34;&#34;</span>
-</span>        <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>constraint</span><span class=p>)</span>
+        <span class=s2>&#34;&#34;&#34;Add a constraint to this objects list of constraints.&#34;&#34;&#34;</span>
+        <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>constraint</span><span class=p>)</span>
 
 <span class=c1>#... </span>
 </code></pre></td></tr></table>
 </div>
-</div><p>Now we need to decide how we&rsquo;re going to actually constrain the parameters. One approach could be to
-apply the <code>CoincidentConstraint</code> to the <code>x</code> and <code>y</code>. I&rsquo;ve thought about this, and I can&rsquo;t see a
-reason why it technically wouldn&rsquo;t work, however it does create an ambiguity. It would not be clear
-if the <code>CoincidentConstraint</code> had been applied directly to the <code>x</code> or if it had inherited it from
-its parent shape. So to avoid this we&rsquo;re going to create an <code>InfluencedConstraint</code>. This new
-constraint will indicate that the parameter is constrained by something higher up the food chain.</p>
+</div><p>Now we need to decide how we&rsquo;re going to actually constrain the parameters. One approach could be to apply the <code>CoincidentConstraint</code> to the <code>x</code> and <code>y</code>. I&rsquo;ve thought about this, and I can&rsquo;t see a reason why it technically wouldn&rsquo;t work, however it does create an ambiguity. It would not be clear if the <code>CoincidentConstraint</code> had been applied directly to the <code>x</code> or if it had inherited it from its parent shape. So to avoid this we&rsquo;re going to create an <code>InfluencedConstraint</code>. This new constraint will indicate that the parameter is constrained by something higher up the food chain.</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
@@ -475,13 +398,12 @@ constraint will indicate that the parameter is constrained by something higher u
     <span class=nd>@property</span>
     <span class=k>def</span> <span class=nf>constraint</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
         <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>_constraint</span>
-    
+
     <span class=k>def</span> <span class=fm>__repr__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
         <span class=k>return</span> <span class=sa>f</span><span class=s2>&#34;</span><span class=si>{</span><span class=bp>self</span><span class=o>.</span><span class=vm>__class__</span><span class=o>.</span><span class=vm>__name__</span><span class=si>}</span><span class=s2>&lt;</span><span class=si>{</span><span class=bp>self</span><span class=o>.</span><span class=n>constraint</span><span class=si>}</span><span class=s2>&gt;&#34;</span>
 </code></pre></td></tr></table>
 </div>
-</div><p>Now we&rsquo;re ready to implement the <code>callback_constraint</code> method on the <code>CoincidentConstraint</code> to have
-it indicate that it is influencing the two co-ordinates.</p>
+</div><p>Now we&rsquo;re ready to implement the <code>callback_constraint</code> method on the <code>CoincidentConstraint</code> to have it indicate that it is influencing the two co-ordinates.</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
@@ -523,15 +445,9 @@ it indicate that it is influencing the two co-ordinates.</p>
 p.x is ConstraintSet(
     InfluencedConstraint&lt;CoincidentConstraint&lt;Line&lt;(1,2),(3,4)&gt;&gt;&gt;
 )
-</code></pre><p>That looks ideal. The <code>Point</code> object is expressing that it is constrained by the
-<code>CoincidentConstraint</code> and if we look at the <code>x</code> coordinate we can see that it is influenced by the
-<code>CoincidentConstraint</code> and even see exactly which line the <code>CoincidentConstraint</code> is constraining
-to. This might get a bit verbose in complex diagrams, but right now its perfect for our needs, so
-let&rsquo;s leave it like that and worry about verbosity if and when it becomes an issue.</p>
+</code></pre><p>That looks ideal. The <code>Point</code> object is expressing that it is constrained by the<code>CoincidentConstraint</code> and if we look at the <code>x</code> coordinate we can see that it is influenced by the<code>CoincidentConstraint</code> and even see exactly which line the <code>CoincidentConstraint</code> is constraining to. This might get a bit verbose in complex diagrams, but right now its perfect for our needs, so let&rsquo;s leave it like that and worry about verbosity if and when it becomes an issue.</p>
 <h2 id=what-type-of-fool-do-you-take-me-for>What type of fool do you take me for?</h2>
-<p>Let&rsquo;s try something a little off the wall. Let&rsquo;s try constraining <code>p.x</code> with a
-<code>CoincidentConstraint</code>. As <code>CoincidentConstraint</code> is only designed to apply to <code>Point</code> objects, it&rsquo;s
-likely to do something a little strange when applied to a <code>ConstraintSet</code>:</p>
+<p>Let&rsquo;s try something a little off the wall. Let&rsquo;s try constraining <code>p.x</code> with a<code>CoincidentConstraint</code>. As <code>CoincidentConstraint</code> is only designed to apply to <code>Point</code> objects, it&rsquo;s likely to do something a little strange when applied to a <code>ConstraintSet</code>:</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
@@ -547,12 +463,7 @@ likely to do something a little strange when applied to a <code>ConstraintSet</c
 </code></pre></td></tr></table>
 </div>
 </div><pre tabindex=0><code>AttributeError: 'ConstraintSet' object has no attribute 'x'
-</code></pre><p>Oh dear! This isn&rsquo;t a very helpful error message is it? Whilst in our simple example its probably
-easy enough to work out what has gone on, more complex scenarios could lead to some real head
-scratching. To resolve this, let&rsquo;s have the <code>constraint_callback</code> check that the
-constraint is being applied to a sensible object. In this case it only really makes sense for
-<code>CoincidentConstraint</code> to be applied to a <code>Point</code>, so let&rsquo;s enforce that. And let&rsquo;s create a custom
-<code>RuntimeError</code> object with a nice error message to tell our users what is going on.</p>
+</code></pre><p>Oh dear! This isn&rsquo;t a very helpful error message is it? Whilst in our simple example its probably easy enough to work out what has gone on, more complex scenarios could lead to some real head scratching. To resolve this, let&rsquo;s have the <code>constraint_callback</code> check that the constraint is being applied to a sensible object. In this case it only really makes sense for<code>CoincidentConstraint</code> to be applied to a <code>Point</code>, so let&rsquo;s enforce that. And let&rsquo;s create a custom<code>RuntimeError</code> object with a nice error message to tell our users what is going on.</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
@@ -601,16 +512,9 @@ constraint is being applied to a sensible object. In this case it only really ma
 </code></pre></td></tr></table>
 </div>
 </div><pre tabindex=0><code>InvalidConstraintException: CoincidentConstraint can only be applied to `Point`, it cannot be applied to `ConstraintSet`.
-</code></pre><p>This is much better, and likely to save our developers a chunk of time as compared with the old
-&ldquo;missing attribute&rdquo; error message. Spoiler alert though, this specific implementation will come back
-to bite us in the next section. Comment if you can see why, and no cheating by reading the next
-section first!</p>
+</code></pre><p>This is much better, and likely to save our developers a chunk of time as compared with the old"missing attribute" error message. Spoiler alert though, this specific implementation will come back to bite us in the next section. Comment if you can see why, and no cheating by reading the next section first!</p>
 <h2 id=one-way-or-another>One way or another.</h2>
-<p>Let&rsquo;s take stock of where we have got to. We have a nice strong framework for expressing geometric
-constraints as <code>Constraint</code> objects, and we have a clean way of applying these to our geometric
-objects. We have clear output when we ask the various objects to <code>repr</code> themselves, and we have
-clear error messages when things don&rsquo;t quite go to plan. There are just a couple of corners we need
-to clear up before we can call ourselves done. Look at the following example:</p>
+<p>Let&rsquo;s take stock of where we have got to. We have a nice strong framework for expressing geometric constraints as <code>Constraint</code> objects, and we have a clean way of applying these to our geometric objects. We have clear output when we ask the various objects to <code>repr</code> themselves, and we have clear error messages when things don&rsquo;t quite go to plan. There are just a couple of corners we need to clear up before we can call ourselves done. Look at the following example:</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
@@ -633,12 +537,7 @@ to clear up before we can call ourselves done. Look at the following example:</p
 q.x is ConstraintSet(
     LinkedValueConstraint&lt;p.x&gt;
 )
-</code></pre><p>This is a tremendously powerful thing to be able to do. We can create a point and say nothing about
-it, then refer to it in constraints. What would happen, though, if we were solving our
-constraint system (the subject of a later article) and <code>q</code> was given a value first? Equality is a
-reciprocal condition, and when we assert that <code>q.x = p.x</code> we are equally saying that <code>p.x = q.x</code>.
-We could force this on our users. We could decide that for the purposes of our geometric solver,
-such operations are not reciprocal, and that users must specify both sides of the relationship:</p>
+</code></pre><p>This is a tremendously powerful thing to be able to do. We can create a point and say nothing about it, then refer to it in constraints. What would happen, though, if we were solving our constraint system (the subject of a later article) and <code>q</code> was given a value first? Equality is a reciprocal condition, and when we assert that <code>q.x = p.x</code> we are equally saying that <code>p.x = q.x</code>.We could force this on our users. We could decide that for the purposes of our geometric solver,such operations are not reciprocal, and that users must specify both sides of the relationship:</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
@@ -665,11 +564,7 @@ such operations are not reciprocal, and that users must specify both sides of th
 q.x is ConstraintSet(
     LinkedValueConstraint&lt;p.x&gt;
 )
-</code></pre><p>Whilst this does tick the PEP20 &ldquo;explicit is better than implicit&rdquo; rule, rule three of the same says
-&ldquo;Simple is better than complex&rdquo;. I&rsquo;m reasonably sure that every geometric relationship is in some
-way reciprocal. If <code>l</code> is parallel to <code>m</code> then <code>m</code> is parallel to <code>l</code>. Even with our
-<code>CoincidentConstraint</code> if our point is on the line, then our line must go through the point. Let&rsquo;s
-update our <code>LinkedValueConstraint</code> to apply the reciprocal constraint.</p>
+</code></pre><p>Whilst this does tick the PEP20 &ldquo;explicit is better than implicit&rdquo; rule, rule three of the same says"Simple is better than complex". I&rsquo;m reasonably sure that every geometric relationship is in someway reciprocal. If <code>l</code> is parallel to <code>m</code> then <code>m</code> is parallel to <code>l</code>. Even with our<code>CoincidentConstraint</code> if our point is on the line, then our line must go through the point. Let&rsquo;s update our <code>LinkedValueConstraint</code> to apply the reciprocal constraint.</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
@@ -712,16 +607,7 @@ update our <code>LinkedValueConstraint</code> to apply the reciprocal constraint
 </code></pre></td></tr></table>
 </div>
 </div><pre tabindex=0><code>RecursionError: maximum recursion depth exceeded while calling a Python object
-</code></pre><p>Oops! What&rsquo;s going on here? Well the problem is that the <code>LinkedValueConstraint</code> applies a
-reciprocal constraint by enforcing a <code>LinkedValueConstraint</code> on the original <code>ConstraintSet</code> which
-in turn tries to apply a reciprocal constraint etc. And the whole world explodes in a glorious stack
-overflow (first one of the project though, I&rsquo;m proud!). We could fix this by adding some kind of
-flag to <code>constrain_with</code> and <code>constraint_callback</code> to indicate that this is a reciprocal call and
-that they should not apply the reciprocal constraint as its already done. This is crying out to be
-forgotten and to lead to some nasty stack overflow type bugs. I think a neater solution is to have
-<code>constrain_with</code> check to see if an identical constraint has already been applied and just exit
-cleanly if it has. To do this we need to establish what it means for two <code>LinkedValueConstraints</code> to
-be equal:</p>
+</code></pre><p>Oops! What&rsquo;s going on here? Well the problem is that the <code>LinkedValueConstraint</code> applies a reciprocal constraint by enforcing a <code>LinkedValueConstraint</code> on the original <code>ConstraintSet</code> which in turn tries to apply a reciprocal constraint etc. And the whole world explodes in a glorious stack overflow (first one of the project though, I&rsquo;m proud!). We could fix this by adding some kind of flag to <code>constrain_with</code> and <code>constraint_callback</code> to indicate that this is a reciprocal call and that they should not apply the reciprocal constraint as its already done. This is crying out to be forgotten and to lead to some nasty stack overflow type bugs. I think a neater solution is to have<code>constrain_with</code> check to see if an identical constraint has already been applied and just exit cleanly if it has. To do this we need to establish what it means for two <code>LinkedValueConstraints</code> to be equal:</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
@@ -736,8 +622,7 @@ be equal:</p>
         <span class=k>return</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>other</span><span class=p>,</span> <span class=bp>self</span><span class=o>.</span><span class=vm>__class__</span><span class=p>)</span> <span class=ow>and</span> <span class=bp>self</span><span class=o>.</span><span class=n>constraint_set</span> <span class=o>==</span> <span class=n>other</span><span class=o>.</span><span class=n>constraint_set</span>
 </code></pre></td></tr></table>
 </div>
-</div><p>Here we&rsquo;ve said that a <code>LinkedValueConstraint</code> is only equal to another object, if and only if that
-other object is also a <code>LinkedValueConstraint</code> and they are both linked to the same <code>ConstraintSet</code>.</p>
+</div><p>Here we&rsquo;ve said that a <code>LinkedValueConstraint</code> is only equal to another object, if and only if that other object is also a <code>LinkedValueConstraint</code> and they are both linked to the same <code>ConstraintSet</code>.</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
@@ -765,8 +650,8 @@ l == n: False
 </span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2> 2</a>
 </span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3> 3</a>
 </span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4> 4</a>
-</span><span class=hl><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
-</span></span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
 </span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7> 7</a>
 </span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8> 8</a>
 </span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9> 9</a>
@@ -778,8 +663,8 @@ l == n: False
 <span class=c1>#... </span>
 
     <span class=k>def</span> <span class=nf>constrain_with</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>constraint</span><span class=p>):</span>
-<span class=hl>        <span class=k>if</span> <span class=n>constraint</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=p>:</span>
-</span>            <span class=k>return</span>
+        <span class=k>if</span> <span class=n>constraint</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=p>:</span>
+            <span class=k>return</span>
         <span class=n>constraint</span><span class=o>.</span><span class=n>constraint_callback</span><span class=p>(</span><span class=bp>self</span><span class=p>)</span>
         <span class=s2>&#34;&#34;&#34;Add a constraint to this objects list of constraints.&#34;&#34;&#34;</span>
         <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>constraint</span><span class=p>)</span>
@@ -807,15 +692,7 @@ l == n: False
 </code></pre></td></tr></table>
 </div>
 </div><pre tabindex=0><code>RecursionError: maximum recursion depth exceeded
-</code></pre><p>It didn&rsquo;t! Nightmare! The issue here is that we are using the <code>constraint_callback</code> to apply the
-reciprocal constraint, but that is being called before the constraint is added to
-<code>self._constraints</code> in the <code>Constraint</code> class. We need it to be that way around because the
-<code>constraint_callback</code> is also validating that the object is of a suitable type. Aha! This is our
-issue. Every time we have to use the work &ldquo;also&rdquo; to describe what an object or method is doing, then
-we likely have ourselves a separation of concerns issue. This was the mistake which I gave you the
-spoiler alert for earlier! Let&rsquo;s split our <code>constraint_callback</code> into
-three: a <code>validate_object</code> method, an <code>apply_reciprocal_constraint</code> method, and finally the
-<code>cascade_constraints</code>.</p>
+</code></pre><p>It didn&rsquo;t! Nightmare! The issue here is that we are using the <code>constraint_callback</code> to apply the reciprocal constraint, but that is being called before the constraint is added to<code>self._constraints</code> in the <code>Constraint</code> class. We need it to be that way around because the<code>constraint_callback</code> is also validating that the object is of a suitable type. Aha! This is our issue. Every time we have to use the work &ldquo;also&rdquo; to describe what an object or method is doing, then we likely have ourselves a separation of concerns issue. This was the mistake which I gave you the spoiler alert for earlier! Let&rsquo;s split our <code>constraint_callback</code> into three: a <code>validate_object</code> method, an <code>apply_reciprocal_constraint</code> method, and finally the<code>cascade_constraints</code>.</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
@@ -848,7 +725,7 @@ three: a <code>validate_object</code> method, an <code>apply_reciprocal_constrai
     <span class=k>def</span> <span class=nf>validate_object</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>instance</span><span class=p>):</span>
         <span class=s2>&#34;&#34;&#34;Validates that `instance` is suitable. Raises `InvalidConstraintException` if not&#34;&#34;&#34;</span>
         <span class=k>raise</span> <span class=ne>NotImplementedError</span><span class=p>(</span><span class=s2>&#34;`validate_object` must be implemented explicitly.&#34;</span><span class=p>)</span>
-    
+
     <span class=nd>@abstractmethod</span>
     <span class=k>def</span> <span class=nf>apply_reciprocal_constraint</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>instance</span><span class=p>):</span>
         <span class=s2>&#34;&#34;&#34;Applies a matching constraint to the provided instance.&#34;&#34;&#34;</span>
@@ -888,7 +765,7 @@ three: a <code>validate_object</code> method, an <code>apply_reciprocal_constrai
 
     <span class=k>def</span> <span class=nf>apply_reciprocal_constraint</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>instance</span><span class=p>):</span>
         <span class=bp>self</span><span class=o>.</span><span class=n>constraint_set</span><span class=o>.</span><span class=n>constrain_with</span><span class=p>(</span><span class=n>LinkedValueConstraint</span><span class=p>(</span><span class=n>instance</span><span class=p>))</span>
-    
+
     <span class=k>def</span> <span class=nf>cascade_constraints</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>instance</span><span class=p>):</span>
         <span class=k>pass</span>
 <span class=c1>#... </span>
@@ -902,8 +779,8 @@ three: a <code>validate_object</code> method, an <code>apply_reciprocal_constrai
 </span><span class=lnt id=2><a style=outline:none;text-decoration:none;color:inherit href=#2> 2</a>
 </span><span class=lnt id=3><a style=outline:none;text-decoration:none;color:inherit href=#3> 3</a>
 </span><span class=lnt id=4><a style=outline:none;text-decoration:none;color:inherit href=#4> 4</a>
-</span><span class=hl><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
-</span></span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
+</span><span class=lnt id=5><a style=outline:none;text-decoration:none;color:inherit href=#5> 5</a>
+</span><span class=lnt id=6><a style=outline:none;text-decoration:none;color:inherit href=#6> 6</a>
 </span><span class=lnt id=7><a style=outline:none;text-decoration:none;color:inherit href=#7> 7</a>
 </span><span class=lnt id=8><a style=outline:none;text-decoration:none;color:inherit href=#8> 8</a>
 </span><span class=lnt id=9><a style=outline:none;text-decoration:none;color:inherit href=#9> 9</a>
@@ -917,8 +794,8 @@ three: a <code>validate_object</code> method, an <code>apply_reciprocal_constrai
 <span class=c1>#... </span>
 
     <span class=k>def</span> <span class=nf>constrain_with</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>constraint</span><span class=p>):</span>
-<span class=hl>        <span class=n>constraint</span><span class=o>.</span><span class=n>validate_object</span><span class=p>(</span><span class=bp>self</span><span class=p>)</span>
-</span>        <span class=k>if</span> <span class=n>constraint</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=p>:</span>
+        <span class=n>constraint</span><span class=o>.</span><span class=n>validate_object</span><span class=p>(</span><span class=bp>self</span><span class=p>)</span>
+        <span class=k>if</span> <span class=n>constraint</span> <span class=ow>in</span> <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=p>:</span>
             <span class=k>return</span>
         <span class=s2>&#34;&#34;&#34;Add a constraint to this objects list of constraints.&#34;&#34;&#34;</span>
         <span class=bp>self</span><span class=o>.</span><span class=n>_constraints</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>constraint</span><span class=p>)</span>
@@ -928,8 +805,7 @@ three: a <code>validate_object</code> method, an <code>apply_reciprocal_constrai
 <span class=c1>#... </span>
 </code></pre></td></tr></table>
 </div>
-</div><p>This has had the happy effect of making the <code>constrain_with</code> method much more readable. Let&rsquo;s see if
-its finally resolved our stack overflow.</p>
+</div><p>This has had the happy effect of making the <code>constrain_with</code> method much more readable. Let&rsquo;s see if its finally resolved our stack overflow.</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1>1</a>
@@ -954,11 +830,9 @@ its finally resolved our stack overflow.</p>
 q.x is ConstraintSet(
     LinkedValueConstraint&lt;p.x&gt;
 )
-</code></pre><p>Horray! That was a surprising amount of work for the apparently simple task of implementing
-reciprocal relationships!</p>
+</code></pre><p>Hooray! That was a surprising amount of work for the apparently simple task of implementing reciprocal relationships!</p>
 <h2 id=wrapping-it-all-up>Wrapping it all up</h2>
-<p>As a final flourish we need to update our existing constraints to have these new methods. Our
-<code>FixedValueConstraint</code> is trivial, we shall just implement each as a no-op:</p>
+<p>As a final flourish we need to update our existing constraints to have these new methods. Our<code>FixedValueConstraint</code> is trivial, we shall just implement each as a no-op:</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
@@ -980,18 +854,12 @@ reciprocal relationships!</p>
 
     <span class=k>def</span> <span class=nf>apply_reciprocal_constraint</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>instance</span><span class=p>):</span>
         <span class=k>pass</span>
-    
+
     <span class=k>def</span> <span class=nf>cascade_constraints</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>instance</span><span class=p>):</span>
         <span class=k>pass</span>
 </code></pre></td></tr></table>
 </div>
-</div><p><code>InfluencedConstraint</code> at first feels like it might be a little more complex. Validation is
-straightforward, it can only apply to another <code>ConstraintSet</code> object, or child object. But what
-about the reciprocal constraint? In fact, we don&rsquo;t need to do anything here, as the reciprocal object is the &ldquo;higher up
-one&rdquo;. If, for example, <code>InfluencedConstraint</code> is being applied to <code>p.x</code>, that&rsquo;s because
-<code>CoincidentConstraint</code> has been applied to <code>p</code> so we already know that the reciprocal constraint is
-in place, as such we don&rsquo;t need to do anything. Similarly we can make no assumptions as to what
-constraints will need to be cascaded and we&rsquo;ll leave that to the &ldquo;higher up&rdquo; object should that be necessary:</p>
+</div><p><code>InfluencedConstraint</code> at first feels like it might be a little more complex. Validation is straightforward, it can only apply to another <code>ConstraintSet</code> object, or child object. But what about the reciprocal constraint? In fact, we don&rsquo;t need to do anything here, as the reciprocal object is the &ldquo;higher up one&rdquo;. If, for example, <code>InfluencedConstraint</code> is being applied to <code>p.x</code>, that&rsquo;s because<code>CoincidentConstraint</code> has been applied to <code>p</code> so we already know that the reciprocal constraint isin place, as such we don&rsquo;t need to do anything. Similarly we can make no assumptions as to what constraints will need to be cascaded and we&rsquo;ll leave that to the &ldquo;higher up&rdquo; object should that be necessary:</p>
 <div class=highlight><div class=chroma>
 <table class=lntable><tr><td class=lntd>
 <pre tabindex=0 class=chroma><code><span class=lnt id=1><a style=outline:none;text-decoration:none;color:inherit href=#1> 1</a>
@@ -1011,7 +879,7 @@ constraints will need to be cascaded and we&rsquo;ll leave that to the &ldquo;hi
 <td class=lntd>
 <pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=k>class</span> <span class=nc>InfluencedConstraint</span><span class=p>(</span><span class=n>Constraint</span><span class=p>):</span>
     <span class=c1>#... </span>
-    
+
     <span class=k>def</span> <span class=nf>validate_object</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>instance</span><span class=p>):</span>
         <span class=k>if</span> <span class=ow>not</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>instance</span><span class=p>,</span> <span class=n>ConstraintSet</span><span class=p>):</span>
             <span class=k>raise</span> <span class=n>InvalidConstraintException</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;</span><span class=si>{</span><span class=bp>self</span><span class=o>.</span><span class=vm>__class__</span><span class=o>.</span><span class=vm>__name__</span><span class=si>}</span><span class=s2> can only&#34;</span>
@@ -1019,16 +887,12 @@ constraints will need to be cascaded and we&rsquo;ll leave that to the &ldquo;hi
 
     <span class=k>def</span> <span class=nf>apply_reciprocal_constraint</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>instance</span><span class=p>):</span>
         <span class=k>pass</span>
-    
+
     <span class=k>def</span> <span class=nf>cascade_constraints</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>instance</span><span class=p>):</span>
         <span class=k>pass</span>
 </code></pre></td></tr></table>
 </div>
-</div><p>We&rsquo;ve already done <code>LinkedValueConstraint</code> so that only leaves <code>CoincidentConstraint</code>. In order to
-do that we&rsquo;ll need to upgrade our <code>Line</code> object to be able to take constraints, and as this article
-is already about twice as long as I intended, let&rsquo;s leave that for next time! In the next article
-we&rsquo;ll look at upgrading our <code>Line</code> to be able to accept <code>Constraint</code> objects, and in so doing we&rsquo;ll
-walk a path towards some pretty powerful generics.</p>
+</div><p>We&rsquo;ve already done <code>LinkedValueConstraint</code> so that only leaves <code>CoincidentConstraint</code>. In order todo that we&rsquo;ll need to upgrade our <code>Line</code> object to be able to take constraints, and as this article is already about twice as long as I intended, let&rsquo;s leave that for next time! In the next article we&rsquo;ll look at upgrading our <code>Line</code> to be able to accept <code>Constraint</code> objects, and in so doing we&rsquo;ll walk a path towards some pretty powerful generics.</p>
 </div>
 </article>
 </div>
