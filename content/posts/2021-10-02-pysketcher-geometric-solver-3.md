@@ -1,5 +1,5 @@
 ---
-title: "Writing a Geometric Solver in Python - Part 3: Fixing our line and adding arithmetic"
+title: "Writing a Geometric Solver in Python - Part 3: Fixing our line"
 series:
   - PySketcher Geometric Solver
 categories:
@@ -7,7 +7,7 @@ categories:
   - pysketcher
   - geometry
   - solver
-draft: true
+draft: false
 description: >
     I describe, over the series, how to implement a geometric solver in
     Python. In this article we take the existing model and upgrade our `Line` object to use
@@ -92,7 +92,6 @@ class InvalidConstraintException(RuntimeError):
     """Indicates that a constraint has been applied to an object which doesn't make sense."""
 
 class InfluencedConstraint(Constraint):
-    #... {{% skip %}}
     def __init__(self, constraint):
         self._constraint = constraint
 
@@ -102,7 +101,6 @@ class InfluencedConstraint(Constraint):
 
     def __repr__(self):
         return f"{self.__class__.__name__}<{self.constraint}>"
-    #... {{% /skip %}}
 
     def validate_object(self, instance):
         if not isinstance(instance, ConstraintSet):
@@ -284,7 +282,7 @@ So we used `ConstrainedValue()` at the class level when we defined our `Point` a
 
 
 <!--phmdoctest-share-names-->
-```python {hl_lines=[4-5,14]}
+```python
 class ConstrainedValue:
     """An object which can be passed around to represent a value."""
 
@@ -1888,4 +1886,6 @@ Line0: Line(
 
 ```
 
-Phew! We made it! We now have a super powerful little framework with which we can model constraints. In the next article we'll look at adding some more constraints into the mix. In particular we'll look at how we can do some simple arithmetic operations with out `ConstraintSet`.
+Phew! We made it! We now have a super powerful little framework with which we can model constraints. It's really worth reflecting on what we've achieved here. Not only have we implemented all that power, but if we compare the implementation of our `Point` with the naive implementation we started with at the beginning of part 1, you'll see its actually simpler to implement using our framework than without.
+
+In the next article we'll look at adding some more constraints into the mix. In particular we'll look at how we can do some simple arithmetic operations with out `ConstraintSet`.
