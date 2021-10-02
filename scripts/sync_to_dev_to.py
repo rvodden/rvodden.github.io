@@ -80,6 +80,7 @@ def main():
             article['result'] = 'failure'
             article['error'] = err
             logging.error(err)
+            logging.error(err.response.text)
             print("failed.")
         else:
             article['result'] = 'success'
@@ -102,7 +103,7 @@ def main():
     for article in update_articles:
         print(f"Updating '{article['title']}...'")
         try:
-            devToClient.update_article(article['id'], convert_to_body_markdown(article['generated_content']))
+            devToClient.update_article(article['id'], article['generated_content'])
         except IOError as err:
             article['result'] = 'failure'
             article['error'] = err

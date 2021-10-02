@@ -1,6 +1,6 @@
 from typing import Dict
 import click, re, yaml
-from ruamel.yaml import YAML
+from ruamel import yaml as yaml2
 from io import StringIO
 
 def displaymatch(match):
@@ -69,8 +69,8 @@ def convert_preamble(preamable: Dict[str, str], filename: str) -> Dict[str, str]
 def convert_to_body_markdown(article: Dict[str, str]) -> str:
     # TODO: this is duplicated in the DevToClient
     stream = StringIO()
-    yaml = YAML()
-    yaml.dump(article['preamble'], stream)
+    yaml2.scalarstring.walk_tree(article['preamble'])
+    yaml2.round_trip_dump(article['preamble'], stream, default_flow_style=False, line_break=0)
     preamble = stream.getvalue()
     return f"---\n{preamble}---\n{article['content']}\n"
 
