@@ -4,6 +4,7 @@ title = "Garbage Collection"
 theme = "minima"
 enableGitInfo = true
 pygmentsUseClasses=true
+googleAnalytics = "UA-89156251-1"
 
 [taxonomies]
   category = 'categories'
