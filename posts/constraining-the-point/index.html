@@ -7,6 +7,7 @@
 <script id=MathJax-script async src=https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js></script>
 <script>window.MathJax={tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['[',']']],processEscapes:!0,processEnvironments:!0},options:{skipHtmlTags:['script','noscript','style','textarea','pre']},startup:{pageReady(){return MathJax.startup.defaultPageReady().then(function(){var b=window.MathJax.startup.document.getMathItemsWithin(document.body),a;for(a=0;a<b.length;a+=1)console.log(b[a]),b[a].start.node.parentNode.className+=' has-jax'})}}}</script>
 <link rel=stylesheet href=/scss/minima.f83841be025e6ffef4f520ea8061831cf9451762e86596f88c22710f1c4b0451.css integrity="sha256-+DhBvgJeb/709SDqgGGDHPlFF2LoZZb4jCJxDxxLBFE=">
+<script type=application/javascript>var doNotTrack=!1;doNotTrack||(function(a,e,f,g,b,c,d){a.GoogleAnalyticsObject=b,a[b]=a[b]||function(){(a[b].q=a[b].q||[]).push(arguments)},a[b].l=1*new Date,c=e.createElement(f),d=e.getElementsByTagName(f)[0],c.async=1,c.src=g,d.parentNode.insertBefore(c,d)}(window,document,'script','https://www.google-analytics.com/analytics.js','ga'),ga('create','UA-89156251-1','auto'),ga('send','pageview'))</script>
 <meta property="og:title" content="Writing a Geometric Solver in Python - Part 1: Modelling Constraints">
 <meta property="og:description" content="I describe, over the series, how to implement a geometric solver in Python. In this article we look at how we might represent a set of geometric relationships in a class hierarchy. We partially implement this for a `Point`object, and consider the developer experience.
 ">
@@ -18,6 +19,7 @@
 <meta name=twitter:title content="Writing a Geometric Solver in Python - Part 1: Modelling Constraints">
 <meta name=twitter:description content="I describe, over the series, how to implement a geometric solver in Python. In this article we look at how we might represent a set of geometric relationships in a class hierarchy. We partially implement this for a `Point`object, and consider the developer experience.
 ">
+<script type=application/javascript>var doNotTrack=!1;doNotTrack||(function(a,e,f,g,b,c,d){a.GoogleAnalyticsObject=b,a[b]=a[b]||function(){(a[b].q=a[b].q||[]).push(arguments)},a[b].l=1*new Date,c=e.createElement(f),d=e.getElementsByTagName(f)[0],c.async=1,c.src=g,d.parentNode.insertBefore(c,d)}(window,document,'script','https://www.google-analytics.com/analytics.js','ga'),ga('create','UA-89156251-1','auto'),ga('send','pageview'))</script>
 </head><body><header class=site-header role=banner>
 <div class=wrapper>
 <a class=site-title href=https://vodden.com/>
